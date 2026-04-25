@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MedCommand — Admin Editor</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<style>
+:root {
+  --bg:      #0a0e1a;
+  --bg2:     #111827;
+  --bg3:     #1a2235;
+  --bg4:     #212d42;
+  --border:  #2a3a55;
+  --text:    #e8edf5;
+  --text2:   #9aafc8;
+  --text3:   #5a7090;
+  --accent:  #2979ff;
+  --green:   #00c853;
+  --red:     #f44336;
+  --orange:  #ff9800;
+  --yellow:  #ffc107;
+  --card:    #131c2e;
+  --radius:  8px;
+  --shadow:  0 4px 24px rgba(0,0,0,.5);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* ── Topbar ── */
+#topbar {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--bg2); border-bottom: 1px solid var(--border);
+  padding: 0 20px; height: 54px; position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 12px rgba(0,0,0,.4);
+}
+.logo { font-weight: 800; font-size: 1.1rem; letter-spacing: .3px; display: flex; align-items: center; gap: 6px; }
+.logo .cross { color: #f44336; font-size: 1.3rem; }
+.logo span  { color: #2979ff; }
+.topbar-sep { width: 1px; height: 28px; background: var(--border); }
+#topbar h2  { font-size: .95rem; color: var(--text2); font-weight: 600; }
+.spacer { flex: 1; }
+.btn { padding: 6px 18px; border-radius: 6px; border: none; cursor: pointer; font-size: .85rem; font-weight: 600; transition: opacity .15s; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-danger  { background: rgba(244,67,54,.15); color: var(--red); border: 1px solid rgba(244,67,54,.3); }
+.btn-ghost   { background: var(--bg3); color: var(--text2); border: 1px solid var(--border); }
+.btn:hover   { opacity: .85; }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+#save-status { font-size: .8rem; padding: 4px 12px; border-radius: 12px; }
+.status-saved   { background: rgba(0,200,83,.12); color: var(--green);  border: 1px solid rgba(0,200,83,.3); }
+.status-saving  { background: rgba(255,152,0,.12); color: var(--orange); border: 1px solid rgba(255,152,0,.3); }
+.status-error   { background: rgba(244,67,54,.12); color: var(--red);    border: 1px solid rgba(244,67,54,.3); }
+.status-unsaved { background: rgba(255,193,7,.12); color: var(--yellow); border: 1px solid rgba(255,193,7,.3); }
+
+/* ── Layout ── */
+#shell { display: flex; height: calc(100vh - 54px); }
+
+/* ── Sidebar: protocol list ── */
+#sidebar {
+  width: 280px; min-width: 280px; background: var(--bg2);
+  border-right: 1px solid var(--border); display: flex; flex-direction: column;
+  overflow: hidden;
+}
+#sidebar-header { padding: 12px 14px; border-bottom: 1px solid var(--border); }
+#sidebar-header h3 { font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text3); margin-bottom: 8px; }
+#search-protocols {
+  width: 100%; background: var(--bg3); border: 1px solid var(--border);
+  color: var(--text); padding: 6px 10px; border-radius: 6px; font-size: .85rem; outline: none;
+}
+#search-protocols:focus { border-color: var(--accent); }
+#search-protocols::placeholder { color: var(--text3); }
+#new-btn { width: 100%; margin-top: 8px; }
+
+#protocol-list { flex: 1; overflow-y: auto; padding: 6px 0; }
+.proto-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 14px; cursor: pointer; border-left: 3px solid transparent;
+  transition: background .12s, border-color .12s; position: relative;
+}
+.proto-item:hover { background: var(--bg3); }
+.proto-item.active { background: var(--bg3); border-left-color: var(--accent); }
+.proto-item .pi-title { flex: 1; font-size: .87rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.proto-item .pi-badge {
+  font-size: .65rem; font-weight: 700; padding: 1px 6px; border-radius: 3px;
+  text-transform: uppercase; flex-shrink: 0;
+}
+.proto-item .pi-set { font-size: .7rem; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80px; }
+.proto-item .pi-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.no-protos { padding: 30px 16px; text-align: center; color: var(--text3); font-size: .85rem; }
+
+/* ── Set filter tabs ── */
+#set-tabs { display: flex; gap: 4px; padding: 8px 14px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+.set-tab {
+  padding: 3px 10px; border-radius: 10px; font-size: .75rem; font-weight: 600; cursor: pointer;
+  background: var(--bg3); border: 1px solid var(--border); color: var(--text2);
+}
+.set-tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* ── Main editor area ── */
+#editor-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+
+/* ── Empty state ── */
+#empty-state {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: var(--text3); gap: 12px;
+}
+#empty-state .es-icon { font-size: 3rem; }
+#empty-state p { font-size: .95rem; }
+
+/* ── Editor toolbar ── */
+#editor-toolbar {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 8px 16px; border-bottom: 1px solid var(--border);
+  background: var(--bg2); flex-shrink: 0;
+}
+.field-group { display: flex; flex-direction: column; gap: 3px; }
+.field-group label { font-size: .7rem; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .5px; }
+.field-input {
+  background: var(--bg3); border: 1px solid var(--border); color: var(--text);
+  padding: 5px 9px; border-radius: 5px; font-size: .83rem; outline: none;
+}
+.field-input:focus { border-color: var(--accent); }
+.field-input.wide { min-width: 200px; }
+.toolbar-sep { width: 1px; height: 32px; background: var(--border); margin: 0 4px; }
+
+/* ── Split pane ── */
+#split { flex: 1; display: flex; overflow: hidden; }
+#write-pane, #preview-pane {
+  flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0;
+}
+#write-pane { border-right: 1px solid var(--border); }
+.pane-header {
+  padding: 6px 14px; background: var(--bg3); border-bottom: 1px solid var(--border);
+  font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text3);
+  display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+}
+.pane-header .ph-actions { margin-left: auto; display: flex; gap: 6px; }
+.ph-btn {
+  background: none; border: none; color: var(--text3); cursor: pointer;
+  font-size: .78rem; padding: 2px 8px; border-radius: 4px; font-weight: 600;
+}
+.ph-btn:hover { background: var(--bg4); color: var(--text); }
+
+#protocol-editor {
+  flex: 1; background: var(--bg); border: none; color: var(--text);
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace; font-size: .88rem;
+  line-height: 1.65; padding: 16px; resize: none; outline: none;
+  tab-size: 2;
+}
+#protocol-editor::placeholder { color: var(--text3); }
+
+#preview-content {
+  flex: 1; overflow-y: auto; padding: 20px 24px;
+  background: var(--card);
+}
+
+/* ── Markdown preview styles ── */
+.preview-body { max-width: 760px; }
+.preview-body h1 { font-size: 1.35rem; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin: 1em 0 .5em; }
+.preview-body h2 { font-size: 1.1rem; color: var(--accent); margin: 1em 0 .4em; }
+.preview-body h3 { font-size: .97rem; color: var(--text2); margin: .9em 0 .3em; }
+.preview-body p  { line-height: 1.7; margin-bottom: .7em; color: var(--text); }
+.preview-body ul, .preview-body ol { padding-left: 1.5em; margin-bottom: .7em; }
+.preview-body li { line-height: 1.7; margin-bottom: 3px; }
+.preview-body table { width: 100%; border-collapse: collapse; margin-bottom: 1em; font-size: .88rem; }
+.preview-body th { background: var(--bg3); padding: 7px 11px; text-align: left; border: 1px solid var(--border); }
+.preview-body td { padding: 7px 11px; border: 1px solid var(--border); }
+.preview-body code { background: var(--bg3); padding: 1px 5px; border-radius: 3px; font-size: .84rem; }
+.preview-body blockquote { border-left: 3px solid var(--accent); padding-left: 14px; color: var(--text2); margin-bottom: .7em; }
+.preview-body hr { border: none; border-top: 1px solid var(--border); margin: 1.2em 0; }
+
+/* Skill-level sections in preview */
+.skill-section { border-left: 5px solid #888; border-radius: 0 8px 8px 0; margin: 12px 0; overflow: hidden; }
+.skill-section-header { padding: 6px 12px; font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #fff; display: flex; align-items: center; gap: 6px; }
+.skill-section-body { padding: 10px 14px 4px; background: var(--card); }
+.skill-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; padding: 8px 12px; background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; font-size: .76rem; }
+.skill-legend-item { display: flex; align-items: center; gap: 5px; font-weight: 700; }
+.skill-legend-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+
+/* ── Syntax hints toolbar ── */
+#syntax-bar {
+  display: flex; gap: 4px; padding: 5px 10px; background: var(--bg2);
+  border-bottom: 1px solid var(--border); flex-wrap: wrap; flex-shrink: 0;
+}
+.syn-btn {
+  background: var(--bg3); border: 1px solid var(--border); color: var(--text2);
+  padding: 3px 9px; border-radius: 4px; font-size: .75rem; cursor: pointer; font-family: 'Consolas', monospace;
+  transition: background .12s, color .12s;
+}
+.syn-btn:hover { background: var(--bg4); color: var(--text); }
+.syn-btn.fence-btn { color: var(--accent); border-color: rgba(41,121,255,.3); background: rgba(41,121,255,.06); }
+
+/* ── Meta bar ── */
+#meta-bar {
+  display: flex; gap: 20px; align-items: center; flex-wrap: wrap;
+  padding: 6px 16px; background: var(--bg2); border-top: 1px solid var(--border);
+  font-size: .77rem; color: var(--text3); flex-shrink: 0;
+}
+#meta-bar span b { color: var(--text2); }
+#char-count.warn { color: var(--orange); }
+
+/* ── Settings panel ── */
+#settings-panel {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 500;
+  align-items: center; justify-content: center; padding: 20px;
+}
+#settings-panel.open { display: flex; }
+.settings-box {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 28px; max-width: 520px; width: 100%; max-height: 88vh; overflow-y: auto; box-shadow: var(--shadow);
+}
+.settings-box h2 { font-size: 1.1rem; margin-bottom: 18px; }
+.settings-section { margin-bottom: 22px; }
+.settings-section h3 { font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--text3); margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 5px; }
+.s-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+.s-input {
+  flex: 1; min-width: 120px; background: var(--bg3); border: 1px solid var(--border);
+  color: var(--text); padding: 6px 10px; border-radius: 5px; font-size: .85rem; outline: none;
+}
+.s-input:focus { border-color: var(--accent); }
+.tag-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--bg3); border: 1px solid var(--border); border-radius: 5px;
+  padding: 3px 9px; font-size: .82rem; margin: 2px;
+}
+.tag-chip .chip-dot { width: 9px; height: 9px; border-radius: 50%; }
+.chip-del { background: none; border: none; color: var(--text3); cursor: pointer; font-size: .95rem; padding: 0 1px; }
+.chip-del:hover { color: var(--red); }
+
+/* ── Login modal ── */
+#login-modal {
+  position: fixed; inset: 0; background: rgba(0,0,0,.8);
+  display: flex; align-items: center; justify-content: center; z-index: 900;
+}
+.login-box {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 32px; max-width: 340px; width: 100%; box-shadow: var(--shadow);
+}
+.login-box h2 { font-size: 1.15rem; margin-bottom: 6px; }
+.login-box p  { font-size: .85rem; color: var(--text2); margin-bottom: 20px; }
+.login-box input {
+  width: 100%; background: var(--bg3); border: 1px solid var(--border);
+  color: var(--text); padding: 8px 12px; border-radius: 6px; font-size: .9rem; outline: none; margin-bottom: 12px;
+}
+.login-box input:focus { border-color: var(--accent); }
+#login-err { color: var(--red); font-size: .82rem; margin-top: 6px; display: none; }
+
+/* ── Toast ── */
+#toast {
+  position: fixed; bottom: 20px; right: 20px; z-index: 1000;
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 7px;
+  padding: 10px 18px; font-size: .85rem; box-shadow: var(--shadow);
+  opacity: 0; transform: translateY(20px); transition: all .25s; pointer-events: none;
+}
+#toast.show { opacity: 1; transform: translateY(0); }
+#toast.success { border-color: rgba(0,200,83,.4); color: var(--green); }
+#toast.error   { border-color: rgba(244,67,54,.4); color: var(--red); }
+
+/* ── Import modal ── */
+#import-modal {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,.75); z-index: 600;
+  align-items: center; justify-content: center; padding: 20px;
+}
+#import-modal.open { display: flex; }
+.import-box {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 28px; max-width: 580px; width: 100%; box-shadow: var(--shadow);
+}
+.import-box h2 { font-size: 1.05rem; margin-bottom: 12px; }
+.import-box p  { font-size: .84rem; color: var(--text2); margin-bottom: 12px; }
+textarea.import-ta {
+  width: 100%; min-height: 160px; background: var(--bg3); border: 1px solid var(--border);
+  color: var(--text); padding: 10px; border-radius: 6px; font-family: 'Consolas', monospace;
+  font-size: .82rem; outline: none; resize: vertical;
+}
+textarea.import-ta:focus { border-color: var(--accent); }
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN MODAL -->
+<div id="login-modal">
+  <div class="login-box">
+    <h2>🔐 MedCommand Admin</h2>
+    <p>Enter your admin password to access the protocol editor.</p>
+    <input type="password" id="pw-input" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn btn-primary" style="width:100%" onclick="doLogin()">Sign In</button>
+    <div id="login-err">Incorrect password — please try again.</div>
+    <div style="margin-top:14px;font-size:.78rem;color:var(--text3);">
+      Default password: <code style="background:var(--bg3);padding:1px 5px;border-radius:3px;">admin123</code>
+    </div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <div class="logo"><span class="cross">✚</span><span>Med</span>Command</div>
+  <div class="topbar-sep"></div>
+  <h2>Protocol Editor</h2>
+  <div class="spacer"></div>
+  <span id="save-status" class="status-saved" style="display:none"></span>
+  <button class="btn btn-ghost" onclick="openImport()" title="Bulk import protocols from JSON">⬆ Import</button>
+  <button class="btn btn-ghost" onclick="openSettings()">⚙ Settings</button>
+  <button class="btn btn-primary" id="save-btn" onclick="saveCurrentProtocol()" disabled>💾 Save Protocol</button>
+  <a href="/" class="btn btn-ghost" title="Back to protocol viewer">← Viewer</a>
+</div>
+
+<!-- MAIN SHELL -->
+<div id="shell">
+
+  <!-- SIDEBAR -->
+  <div id="sidebar">
+    <div id="sidebar-header">
+      <h3>Protocols <span id="proto-count" style="color:var(--accent)"></span></h3>
+      <input type="text" id="search-protocols" placeholder="Search…" oninput="renderList()">
+      <button class="btn btn-primary" id="new-btn" onclick="newProtocol()">+ New Protocol</button>
+    </div>
+    <div id="set-tabs"></div>
+    <div id="protocol-list"></div>
+  </div>
+
+  <!-- EDITOR AREA -->
+  <div id="editor-area">
+
+    <!-- EMPTY STATE -->
+    <div id="empty-state">
+      <div class="es-icon">📋</div>
+      <p>Select a protocol to edit, or create a new one.</p>
+      <button class="btn btn-primary" onclick="newProtocol()">+ New Protocol</button>
+    </div>
+
+    <!-- EDITOR (hidden until protocol selected) -->
+    <div id="editor-wrap" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+
+      <!-- FIELDS TOOLBAR -->
+      <div id="editor-toolbar">
+        <div class="field-group">
+          <label>Title</label>
+          <input type="text" id="f-title" class="field-input wide" placeholder="Protocol title" oninput="markUnsaved()">
+        </div>
+        <div class="field-group">
+          <label>Protocol Set</label>
+          <select id="f-set" class="field-input" onchange="markUnsaved()"></select>
+        </div>
+        <div class="field-group">
+          <label>Skill Level</label>
+          <select id="f-level" class="field-input" onchange="markUnsaved()"></select>
+        </div>
+        <div class="field-group">
+          <label>Tags (comma separated)</label>
+          <input type="text" id="f-tags" class="field-input" style="min-width:160px" placeholder="medical, trauma" oninput="markUnsaved()">
+        </div>
+        <div class="field-group">
+          <label>Revised</label>
+          <input type="date" id="f-revised" class="field-input" onchange="markUnsaved()">
+        </div>
+        <div class="toolbar-sep"></div>
+        <button class="btn btn-danger" onclick="deleteCurrentProtocol()" title="Delete this protocol">🗑 Delete</button>
+      </div>
+
+      <!-- SYNTAX HINTS BAR -->
+      <div id="syntax-bar"></div>
+
+      <!-- SPLIT PANE -->
+      <div id="split">
+        <div id="write-pane">
+          <div class="pane-header">
+            ✏ Write
+            <div class="ph-actions">
+              <button class="ph-btn" onclick="insertFence()" title="Insert skill fence at cursor">+ Fence</button>
+              <button class="ph-btn" onclick="insertTable()" title="Insert table template">+ Table</button>
+              <button class="ph-btn" onclick="insertCallout()" title="Insert callout block">+ Note</button>
+            </div>
+          </div>
+          <textarea id="protocol-editor"
+            placeholder="Write your protocol in CommonMark Markdown here…&#10;&#10;Use ::: levelid … ::: to create skill-level sections."
+            oninput="onEditorInput()" onkeydown="handleEditorKey(event)"
+            spellcheck="true"></textarea>
+        </div>
+        <div id="preview-pane">
+          <div class="pane-header">
+            👁 Live Preview
+            <div class="ph-actions">
+              <button class="ph-btn" onclick="copyProtocolLink()" title="Copy link to this protocol">🔗 Link</button>
+            </div>
+          </div>
+          <div id="preview-content"><div class="preview-body" id="preview-body"></div></div>
+        </div>
+      </div>
+
+      <!-- META BAR -->
+      <div id="meta-bar">
+        <span>ID: <b id="m-id">—</b></span>
+        <span>Words: <b id="m-words">0</b></span>
+        <span>Chars: <b id="char-count">0</b></span>
+        <span>Sections: <b id="m-sections">0</b></span>
+        <span id="m-unsaved" style="color:var(--yellow);display:none;">● Unsaved changes</span>
+      </div>
+
+    </div><!-- /editor-wrap -->
+  </div><!-- /editor-area -->
+</div><!-- /shell -->
+
+<!-- SETTINGS PANEL -->
+<div id="settings-panel">
+  <div class="settings-box">
+    <h2>⚙ Settings</h2>
+
+    <div class="settings-section">
+      <h3>Protocol Sets</h3>
+      <div class="s-row">
+        <input type="text" class="s-input" id="s-set-name" placeholder="Set name (e.g. ALS 2025)">
+        <button class="btn btn-primary" onclick="addSet()">Add</button>
+      </div>
+      <div id="s-sets-list"></div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Category Tags</h3>
+      <div class="s-row">
+        <input type="text" class="s-input" id="s-tag-name" placeholder="Tag name">
+        <input type="color" id="s-tag-color" value="#2979ff" style="width:36px;height:32px;border:none;cursor:pointer;background:none;border-radius:4px;">
+        <button class="btn btn-primary" onclick="addTag()">Add</button>
+      </div>
+      <div id="s-tags-list" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;"></div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Skill Levels</h3>
+      <div class="s-row">
+        <input type="text" class="s-input" id="s-level-name" placeholder="Level name (e.g. CCTP)">
+        <input type="color" id="s-level-color" value="#9c27b0" style="width:36px;height:32px;border:none;cursor:pointer;background:none;border-radius:4px;">
+        <button class="btn btn-primary" onclick="addLevel()">Add</button>
+      </div>
+      <div id="s-levels-list" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;"></div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Admin Password</h3>
+      <div class="s-row">
+        <input type="password" class="s-input" id="s-new-pw" placeholder="New password">
+        <button class="btn btn-primary" onclick="changePassword()">Update</button>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px;">
+      <button class="btn btn-ghost" onclick="closeSettings()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- IMPORT MODAL -->
+<div id="import-modal">
+  <div class="import-box">
+    <h2>⬆ Bulk Import Protocols</h2>
+    <p>Paste a JSON array of protocol objects. Each object needs at minimum a <code>title</code> and <code>content</code> field. Missing fields will use defaults. Existing protocols with matching IDs will be updated.</p>
+    <textarea class="import-ta" id="import-ta" placeholder='[
+  {
+    "id": "p009",
+    "title": "Hypoglycemia",
+    "setId": "set1",
+    "tags": ["medical"],
+    "level": "emt",
+    "revised": "2025-04-25",
+    "content": "## Hypoglycemia\n\n::: emt\n### EMT Interventions\n- Oral glucose 15g PO\n:::"
+  }
+]'></textarea>
+    <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="closeImport()">Cancel</button>
+      <button class="btn btn-primary" onclick="doImport()">Import Protocols</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════
+let token = sessionStorage.getItem('medcmd_token') || null;
+let state = { sets: [], tags: [], levels: [], protocols: [] };
+let currentId = null;
+let unsaved = false;
+let previewTimer = null;
+let activeSetFilter = 'all';
+
+// ══════════════════════════════════════════════════
+// API HELPERS
+// ══════════════════════════════════════════════════
+const api = async (method, path, body) => {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (token) opts.headers['Authorization'] = 'Bearer ' + token;
+  if (body !== undefined) opts.body = JSON.stringify(body);
+  const r = await fetch('/api' + path, opts);
+  if (r.status === 401) { logout(); throw new Error('Unauthorized'); }
+  const data = await r.json();
+  if (!r.ok) throw new Error(data.error || r.status);
+  return data;
+};
+
+// ══════════════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════════════
+function logout() {
+  token = null;
+  sessionStorage.removeItem('medcmd_token');
+  document.getElementById('login-modal').style.display = 'flex';
+}
+
+async function doLogin() {
+  const pw = document.getElementById('pw-input').value;
+  try {
+    const r = await fetch('/api/auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw })
+    });
+    if (!r.ok) throw new Error('bad');
+    const d = await r.json();
+    token = d.token;
+    sessionStorage.setItem('medcmd_token', token);
+    document.getElementById('login-modal').style.display = 'none';
+    document.getElementById('pw-input').value = '';
+    document.getElementById('login-err').style.display = 'none';
+    await loadAll();
+  } catch {
+    document.getElementById('login-err').style.display = 'block';
+  }
+}
+
+// ══════════════════════════════════════════════════
+// LOAD ALL DATA
+// ══════════════════════════════════════════════════
+async function loadAll() {
+  try {
+    const s = await fetch('/api/state').then(r => r.json());
+    state.sets      = s.sets      || [];
+    state.tags      = s.tags      || [];
+    state.levels    = s.levels    || [];
+    state.protocols = s.protocols || [];
+    rebuildUI();
+  } catch(e) {
+    toast('Failed to load data: ' + e.message, 'error');
+  }
+}
+
+function rebuildUI() {
+  renderSetTabs();
+  renderList();
+  populateFieldSelects();
+  renderSettingsLists();
+  renderSyntaxBar();
+}
+
+// ══════════════════════════════════════════════════
+// SIDEBAR
+// ══════════════════════════════════════════════════
+function renderSetTabs() {
+  const el = document.getElementById('set-tabs');
+  el.innerHTML = `<span class="set-tab ${activeSetFilter==='all'?'active':''}" onclick="setFilter('all')">All</span>` +
+    state.sets.map(s =>
+      `<span class="set-tab ${activeSetFilter===s.id?'active':''}" onclick="setFilter('${s.id}')">${s.name}</span>`
+    ).join('');
+}
+
+function setFilter(id) {
+  activeSetFilter = id;
+  renderSetTabs();
+  renderList();
+}
+
+function renderList() {
+  const q = document.getElementById('search-protocols').value.toLowerCase();
+  let protos = state.protocols;
+  if (activeSetFilter !== 'all') protos = protos.filter(p => p.setId === activeSetFilter);
+  if (q) protos = protos.filter(p => p.title.toLowerCase().includes(q) || (p.content||'').toLowerCase().includes(q));
+
+  const el = document.getElementById('protocol-list');
+  document.getElementById('proto-count').textContent = `(${state.protocols.length})`;
+
+  if (!protos.length) {
+    el.innerHTML = `<div class="no-protos">${q ? 'No results for "'+q+'"' : 'No protocols yet.<br>Click + New Protocol to start.'}</div>`;
+    return;
+  }
+
+  el.innerHTML = protos.map(p => {
+    const lvl = state.levels.find(l => l.id === p.level);
+    const dot  = lvl ? `<span class="pi-dot" style="background:${lvl.color}"></span>` : '';
+    const badge = lvl ? `<span class="pi-badge" style="background:${lvl.color}22;color:${lvl.color};border:1px solid ${lvl.color}44">${lvl.name}</span>` : '';
+    const setName = (state.sets.find(s => s.id === p.setId) || {}).name || '';
+    return `
+      <div class="proto-item ${p.id === currentId ? 'active' : ''}" onclick="selectProtocol('${p.id}')">
+        ${dot}
+        <div style="flex:1;min-width:0;">
+          <div class="pi-title">${p.title}</div>
+          <div class="pi-set">${setName}</div>
+        </div>
+        ${badge}
+      </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════
+// PROTOCOL SELECT / EDIT
+// ══════════════════════════════════════════════════
+function selectProtocol(id) {
+  if (unsaved && !confirm('You have unsaved changes. Discard them?')) return;
+  const p = state.protocols.find(x => x.id === id);
+  if (!p) return;
+  currentId = id;
+  unsaved = false;
+
+  document.getElementById('empty-state').style.display   = 'none';
+  document.getElementById('editor-wrap').style.display   = 'flex';
+  document.getElementById('save-btn').disabled = false;
+
+  document.getElementById('f-title').value   = p.title   || '';
+  document.getElementById('f-set').value     = p.setId   || (state.sets[0]?.id || '');
+  document.getElementById('f-level').value   = p.level   || (state.levels[0]?.id || '');
+  document.getElementById('f-tags').value    = (p.tags||[]).join(', ');
+  document.getElementById('f-revised').value = p.revised || '';
+  document.getElementById('protocol-editor').value = p.content || '';
+
+  updateMeta();
+  updatePreview();
+  updateSaveStatus('saved');
+  renderList();
+}
+
+function newProtocol() {
+  if (unsaved && !confirm('You have unsaved changes. Discard them?')) return;
+  currentId = null;
+  unsaved = false;
+
+  document.getElementById('empty-state').style.display  = 'none';
+  document.getElementById('editor-wrap').style.display  = 'flex';
+  document.getElementById('save-btn').disabled = false;
+
+  document.getElementById('f-title').value   = '';
+  document.getElementById('f-set').value     = state.sets[0]?.id || '';
+  document.getElementById('f-level').value   = state.levels[0]?.id || '';
+  document.getElementById('f-tags').value    = '';
+  document.getElementById('f-revised').value = new Date().toISOString().split('T')[0];
+  document.getElementById('protocol-editor').value = defaultTemplate();
+
+  updateMeta();
+  updatePreview();
+  document.getElementById('f-title').focus();
+  updateSaveStatus('unsaved');
+  markUnsaved();
+}
+
+function defaultTemplate() {
+  const levels = state.levels.map(l => l.id);
+  if (!levels.length) return '## Protocol Title\n\n**Indications:** When this protocol applies.\n\n---\n\n### Initial Assessment\n- Scene safety / BSI\n';
+  const fences = levels.map(l => `::: ${l}\n### ${state.levels.find(x=>x.id===l)?.name || l} Interventions\n- Step one\n- Step two\n:::`).join('\n\n');
+  return `## Protocol Title\n\n**Indications:** When this protocol applies.\n\n**Contraindications:** When NOT to use.\n\n---\n\n### Initial Assessment\n- Scene safety / BSI precautions\n- Obtain history and vital signs\n\n---\n\n${fences}\n\n---\n\n### Related Protocols\n- [See Protocol Name](protocol:p001)\n`;
+}
+
+async function saveCurrentProtocol() {
+  const title   = document.getElementById('f-title').value.trim();
+  if (!title) { toast('Title is required', 'error'); return; }
+
+  const proto = {
+    title,
+    setId:   document.getElementById('f-set').value,
+    level:   document.getElementById('f-level').value,
+    tags:    document.getElementById('f-tags').value.split(',').map(t=>t.trim()).filter(Boolean),
+    revised: document.getElementById('f-revised').value,
+    content: document.getElementById('protocol-editor').value,
+  };
+
+  updateSaveStatus('saving');
+  try {
+    let saved;
+    if (currentId) {
+      saved = await api('PUT', '/protocols/' + currentId, proto);
+      const idx = state.protocols.findIndex(p => p.id === currentId);
+      if (idx >= 0) state.protocols[idx] = saved;
+    } else {
+      saved = await api('POST', '/protocols', proto);
+      state.protocols.push(saved);
+      currentId = saved.id;
+    }
+    unsaved = false;
+    updateSaveStatus('saved');
+    document.getElementById('m-unsaved').style.display = 'none';
+    renderList();
+    toast('Protocol saved and live for all users ✓', 'success');
+  } catch(e) {
+    updateSaveStatus('error');
+    toast('Save failed: ' + e.message, 'error');
+  }
+}
+
+async function deleteCurrentProtocol() {
+  if (!currentId) return;
+  const p = state.protocols.find(x => x.id === currentId);
+  if (!confirm(`Delete "${p?.title || 'this protocol'}"? This cannot be undone.`)) return;
+
+  try {
+    await api('DELETE', '/protocols/' + currentId);
+    state.protocols = state.protocols.filter(x => x.id !== currentId);
+    currentId = null;
+    unsaved = false;
+    document.getElementById('editor-wrap').style.display = 'none';
+    document.getElementById('empty-state').style.display = 'flex';
+    document.getElementById('save-btn').disabled = true;
+    renderList();
+    toast('Protocol deleted', 'success');
+  } catch(e) {
+    toast('Delete failed: ' + e.message, 'error');
+  }
+}
+
+// ══════════════════════════════════════════════════
+// EDITOR INPUT & PREVIEW
+// ══════════════════════════════════════════════════
+function onEditorInput() {
+  markUnsaved();
+  updateMeta();
+  clearTimeout(previewTimer);
+  previewTimer = setTimeout(updatePreview, 300);
+}
+
+function markUnsaved() {
+  unsaved = true;
+  document.getElementById('m-unsaved').style.display = 'inline';
+  updateSaveStatus('unsaved');
+}
+
+function updateSaveStatus(status) {
+  const el = document.getElementById('save-status');
+  el.style.display = '';
+  el.className = '';
+  if (status === 'saved')   { el.textContent = '✓ Saved'; el.className = 'status-saved'; }
+  if (status === 'saving')  { el.textContent = '⏳ Saving…'; el.className = 'status-saving'; }
+  if (status === 'error')   { el.textContent = '✕ Save failed'; el.className = 'status-error'; }
+  if (status === 'unsaved') { el.textContent = '● Unsaved'; el.className = 'status-unsaved'; }
+}
+
+function updateMeta() {
+  const content = document.getElementById('protocol-editor').value;
+  const words = content.trim() ? content.trim().split(/\s+/).length : 0;
+  const chars = content.length;
+  const fences = (content.match(/^:::\s*[a-z]/gm) || []).length;
+  document.getElementById('m-id').textContent    = currentId || '(new)';
+  document.getElementById('m-words').textContent = words;
+  document.getElementById('char-count').textContent = chars;
+  document.getElementById('m-sections').textContent = fences;
+  document.getElementById('char-count').className = chars > 50000 ? 'warn' : '';
+}
+
+function updatePreview() {
+  const content = document.getElementById('protocol-editor').value;
+  const html = renderProtocolContent(content);
+  document.getElementById('preview-body').innerHTML = html;
+}
+
+// ── Fence renderer (same logic as main app) ──────
+function renderProtocolContent(md) {
+  const levelIds = state.levels.map(l => l.id.toLowerCase());
+  const lines = md.split('\n');
+  const chunks = [];
+  let currentType = 'plain', currentLevel = null, buffer = [];
+
+  function flush() {
+    if (buffer.length) chunks.push({ type: currentType, levelId: currentLevel, text: buffer.join('\n') });
+    buffer = [];
+  }
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    const openMatch = trimmed.match(/^:::\s*([a-zA-Z0-9_-]+)\s*$/);
+    const isClose   = trimmed === ':::';
+    if (currentType === 'plain' && openMatch) {
+      const lid = openMatch[1].toLowerCase();
+      if (levelIds.includes(lid)) { flush(); currentType = 'skill'; currentLevel = lid; continue; }
+    }
+    if (currentType === 'skill' && isClose) { flush(); currentType = 'plain'; currentLevel = null; continue; }
+    buffer.push(line);
+  }
+  flush();
+
+  const usedLevels = [...new Set(chunks.filter(c=>c.type==='skill').map(c=>c.levelId))];
+  let html = '';
+
+  if (usedLevels.length) {
+    const items = usedLevels.map(lid => {
+      const lvl = state.levels.find(l=>l.id.toLowerCase()===lid) || { name: lid, color: '#888' };
+      return `<span class="skill-legend-item"><span class="skill-legend-dot" style="background:${lvl.color}"></span>${lvl.name}</span>`;
+    }).join('');
+    html += `<div class="skill-legend"><strong style="margin-right:6px;color:var(--text2)">Skill Levels:</strong>${items}</div>`;
+  }
+
+  for (const chunk of chunks) {
+    const rendered = marked.parse(chunk.text).replace(/href="protocol:([^"]+)"/g, 'href="#" data-pid="$1" title="Protocol: $1"');
+    if (chunk.type === 'plain') {
+      html += rendered;
+    } else {
+      const lvl = state.levels.find(l=>l.id.toLowerCase()===chunk.levelId) || { name: chunk.levelId.toUpperCase(), color: '#888888' };
+      html += `<div class="skill-section" style="border-left-color:${lvl.color}">
+        <div class="skill-section-header" style="background:${lvl.color}">🏥 ${lvl.name} Scope</div>
+        <div class="skill-section-body">${rendered}</div>
+      </div>`;
+    }
+  }
+  return html;
+}
+
+// ══════════════════════════════════════════════════
+// SYNTAX BAR
+// ══════════════════════════════════════════════════
+function renderSyntaxBar() {
+  const bar = document.getElementById('syntax-bar');
+  const snippets = [
+    ['**bold**', '**bold**'],
+    ['*italic*', '*italic*'],
+    ['## H2', '## Heading\n'],
+    ['### H3', '### Heading\n'],
+    ['- list', '- Item\n'],
+    ['1. list', '1. Item\n'],
+    ['> note', '> Note text\n'],
+    ['table', '| Col1 | Col2 |\n|------|------|\n| A    | B    |\n'],
+    ['---', '\n---\n'],
+    ['`code`', '`code`'],
+    ['[link](url)', '[text](https://)'],
+    ['[protocol](protocol:id)', '[See Protocol](protocol:p001)'],
+  ];
+
+  const levelBtns = state.levels.map(l =>
+    `<button class="syn-btn fence-btn" onclick="insertSnippet('::: ${l.id}\\n\\n:::')" title="Insert ${l.name} section">::: ${l.id}</button>`
+  ).join('');
+
+  bar.innerHTML = snippets.map(([label, snippet]) =>
+    `<button class="syn-btn" onclick="insertSnippet(${JSON.stringify(snippet)})">${label}</button>`
+  ).join('') + (levelBtns ? '<span style="width:1px;background:var(--border);margin:0 4px;display:inline-block;height:20px;vertical-align:middle"></span>' + levelBtns : '');
+}
+
+// ══════════════════════════════════════════════════
+// EDITOR HELPERS
+// ══════════════════════════════════════════════════
+function insertSnippet(text) {
+  const ta = document.getElementById('protocol-editor');
+  const start = ta.selectionStart;
+  const end   = ta.selectionEnd;
+  const before = ta.value.substring(0, start);
+  const after  = ta.value.substring(end);
+  ta.value = before + text + after;
+  const cursor = start + text.length;
+  ta.setSelectionRange(cursor, cursor);
+  ta.focus();
+  onEditorInput();
+}
+
+function insertFence() {
+  if (!state.levels.length) { toast('No skill levels defined yet — add them in Settings', 'error'); return; }
+  const l = state.levels[0];
+  insertSnippet(`::: ${l.id}\n### ${l.name} Interventions\n- Step one\n- Step two\n:::`);
+}
+
+function insertTable() {
+  insertSnippet('\n| Column 1 | Column 2 | Column 3 |\n|----------|----------|----------|\n| Cell A   | Cell B   | Cell C   |\n');
+}
+
+function insertCallout() {
+  insertSnippet('\n> **Note:** Important information here.\n');
+}
+
+function handleEditorKey(e) {
+  // Tab key → insert 2 spaces
+  if (e.key === 'Tab') {
+    e.preventDefault();
+    insertSnippet('  ');
+  }
+  // Ctrl/Cmd+S → save
+  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+    e.preventDefault();
+    saveCurrentProtocol();
+  }
+}
+
+function copyProtocolLink() {
+  if (!currentId) return;
+  const link = `${window.location.origin}/#protocol:${currentId}`;
+  navigator.clipboard.writeText(link).then(() => toast('Protocol link copied ✓', 'success'));
+}
+
+// ══════════════════════════════════════════════════
+// FIELD POPULATION
+// ══════════════════════════════════════════════════
+function populateFieldSelects() {
+  const setEl = document.getElementById('f-set');
+  const lvlEl = document.getElementById('f-level');
+  const curSet = setEl.value;
+  const curLvl = lvlEl.value;
+  setEl.innerHTML = state.sets.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+  lvlEl.innerHTML = state.levels.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
+  if (curSet) setEl.value = curSet;
+  if (curLvl) lvlEl.value = curLvl;
+}
+
+// ══════════════════════════════════════════════════
+// SETTINGS
+// ══════════════════════════════════════════════════
+function openSettings() { document.getElementById('settings-panel').classList.add('open'); renderSettingsLists(); }
+function closeSettings() { document.getElementById('settings-panel').classList.remove('open'); }
+
+document.getElementById('settings-panel').addEventListener('click', e => {
+  if (e.target === document.getElementById('settings-panel')) closeSettings();
+});
+
+function renderSettingsLists() {
+  // Sets
+  document.getElementById('s-sets-list').innerHTML = state.sets.map(s =>
+    `<div class="tag-chip"><span>${s.name}</span><button class="chip-del" onclick="removeSet('${s.id}')">✕</button></div>`
+  ).join('');
+  // Tags
+  document.getElementById('s-tags-list').innerHTML = state.tags.map(t =>
+    `<div class="tag-chip"><span class="chip-dot" style="background:${t.color}"></span>${t.name}<button class="chip-del" onclick="removeTag('${t.id}')">✕</button></div>`
+  ).join('');
+  // Levels
+  document.getElementById('s-levels-list').innerHTML = state.levels.map(l =>
+    `<div class="tag-chip"><span class="chip-dot" style="background:${l.color}"></span>${l.name}<button class="chip-del" onclick="removeLevel('${l.id}')">✕</button></div>`
+  ).join('');
+}
+
+async function addSet() {
+  const name = document.getElementById('s-set-name').value.trim();
+  if (!name) return;
+  try {
+    const s = await api('POST', '/sets', { id: 'set_' + Date.now(), name, url: '' });
+    state.sets.push(s);
+    document.getElementById('s-set-name').value = '';
+    renderSettingsLists(); renderSetTabs(); populateFieldSelects();
+    toast('Set added ✓', 'success');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function removeSet(id) {
+  if (state.sets.length <= 1) { toast('Cannot remove last set', 'error'); return; }
+  if (!confirm('Remove this protocol set?')) return;
+  try {
+    await api('DELETE', '/sets/' + id);
+    state.sets = state.sets.filter(s => s.id !== id);
+    renderSettingsLists(); renderSetTabs(); populateFieldSelects();
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function addTag() {
+  const name  = document.getElementById('s-tag-name').value.trim();
+  const color = document.getElementById('s-tag-color').value;
+  if (!name) return;
+  const id = name.toLowerCase().replace(/\s+/g, '_');
+  try {
+    const t = await api('POST', '/tags', { id, name, color });
+    state.tags.push(t);
+    document.getElementById('s-tag-name').value = '';
+    renderSettingsLists();
+    toast('Tag added ✓', 'success');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function removeTag(id) {
+  try {
+    await api('DELETE', '/tags/' + id);
+    state.tags = state.tags.filter(t => t.id !== id);
+    renderSettingsLists();
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function addLevel() {
+  const name  = document.getElementById('s-level-name').value.trim();
+  const color = document.getElementById('s-level-color').value;
+  if (!name) return;
+  const id = name.toLowerCase().replace(/\s+/g, '_');
+  try {
+    const l = await api('POST', '/levels', { id, name, color });
+    state.levels.push(l);
+    document.getElementById('s-level-name').value = '';
+    renderSettingsLists(); populateFieldSelects(); renderSyntaxBar();
+    toast('Level added ✓', 'success');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function removeLevel(id) {
+  try {
+    await api('DELETE', '/levels/' + id);
+    state.levels = state.levels.filter(l => l.id !== id);
+    renderSettingsLists(); populateFieldSelects(); renderSyntaxBar();
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+async function changePassword() {
+  const pw = document.getElementById('s-new-pw').value;
+  if (!pw) return;
+  try {
+    await api('PUT', '/settings', { newPassword: pw });
+    document.getElementById('s-new-pw').value = '';
+    toast('Password updated ✓', 'success');
+  } catch(e) { toast('Error: ' + e.message, 'error'); }
+}
+
+// ══════════════════════════════════════════════════
+// BULK IMPORT
+// ══════════════════════════════════════════════════
+function openImport()  { document.getElementById('import-modal').classList.add('open'); }
+function closeImport() { document.getElementById('import-modal').classList.remove('open'); }
+
+document.getElementById('import-modal').addEventListener('click', e => {
+  if (e.target === document.getElementById('import-modal')) closeImport();
+});
+
+async function doImport() {
+  const raw = document.getElementById('import-ta').value.trim();
+  let protos;
+  try { protos = JSON.parse(raw); } catch { toast('Invalid JSON — check your input', 'error'); return; }
+  if (!Array.isArray(protos)) { toast('Expected a JSON array [ ... ]', 'error'); return; }
+
+  let created = 0, updated = 0, failed = 0;
+  for (const p of protos) {
+    if (!p.title) { failed++; continue; }
+    const proto = {
+      title:   p.title,
+      setId:   p.setId   || state.sets[0]?.id || 'set1',
+      level:   p.level   || state.levels[0]?.id || 'emt',
+      tags:    Array.isArray(p.tags) ? p.tags : [],
+      revised: p.revised || new Date().toISOString().split('T')[0],
+      content: p.content || '',
+    };
+    try {
+      const existing = p.id && state.protocols.find(x => x.id === p.id);
+      if (existing) {
+        const saved = await api('PUT', '/protocols/' + existing.id, proto);
+        const idx = state.protocols.findIndex(x => x.id === existing.id);
+        if (idx >= 0) state.protocols[idx] = saved;
+        updated++;
+      } else {
+        if (p.id) proto._requestedId = p.id;
+        const saved = await api('POST', '/protocols', p.id ? { id: p.id, ...proto } : proto);
+        state.protocols.push(saved);
+        created++;
+      }
+    } catch { failed++; }
+  }
+  renderList();
+  closeImport();
+  document.getElementById('import-ta').value = '';
+  toast(`Import complete: ${created} created, ${updated} updated${failed?' ('+failed+' failed)':''}`, failed ? 'error' : 'success');
+}
+
+// ══════════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════════
+let toastTimer;
+function toast(msg, type = '') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show' + (type ? ' ' + type : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.className = '', 3000);
+}
+
+// ══════════════════════════════════════════════════
+// UNSAVED WARN ON UNLOAD
+// ══════════════════════════════════════════════════
+window.addEventListener('beforeunload', e => {
+  if (unsaved) { e.preventDefault(); e.returnValue = ''; }
+});
+
+// ══════════════════════════════════════════════════
+// BOOT
+// ══════════════════════════════════════════════════
+(async () => {
+  if (token) {
+    // Verify token is still valid
+    try {
+      await loadAll();
+      document.getElementById('login-modal').style.display = 'none';
+    } catch {
+      logout();
+    }
+  }
+  // If no token, login modal is already visible
+})();
+</script>
+</body>
+</html>
