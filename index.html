@@ -1,0 +1,2210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MedCommand EMS Protocols</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --bg2: #111827;
+    --bg3: #1a2235;
+    --bg4: #212d42;
+    --border: #2a3a55;
+    --text: #e8edf5;
+    --text2: #9aafc8;
+    --text3: #5a7090;
+    --accent: #2979ff;
+    --accent2: #0d47a1;
+    --green: #00c853;
+    --red: #f44336;
+    --orange: #ff9800;
+    --yellow: #ffc107;
+    --purple: #9c27b0;
+    --teal: #00bcd4;
+    --card: #131c2e;
+    --shadow: 0 4px 24px rgba(0,0,0,0.5);
+    --radius: 10px;
+    --emt-color: #2979ff;
+    --paramedic-color: #9c27b0;
+    --aemt-color: #00bcd4;
+  }
+  .light-mode {
+    --bg: #f0f4ff;
+    --bg2: #ffffff;
+    --bg3: #e8eef8;
+    --bg4: #dce6f5;
+    --border: #c5d3e8;
+    --text: #0d1b2e;
+    --text2: #3a5070;
+    --text3: #8090a8;
+    --card: #ffffff;
+    --shadow: 0 4px 24px rgba(0,0,0,0.1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    transition: background 0.3s, color 0.3s;
+    overflow-x: hidden;
+  }
+
+  /* ── Layout ── */
+  #app { display: flex; flex-direction: column; min-height: 100vh; }
+  #topbar {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--bg2); border-bottom: 1px solid var(--border);
+    padding: 0 16px; height: 56px; position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  }
+  #topbar .logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 1.1rem; letter-spacing: 0.5px; }
+  #topbar .logo span { color: var(--accent); }
+  #topbar .logo .cross { font-size: 1.4rem; color: var(--red); }
+  #menu-btn { display: none; background: none; border: none; color: var(--text); font-size: 1.4rem; cursor: pointer; padding: 4px 8px; }
+  #search-bar {
+    flex: 1; max-width: 400px; margin: 0 auto;
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 24px; padding: 6px 16px; color: var(--text);
+    font-size: 0.9rem; outline: none; transition: border-color 0.2s;
+  }
+  #search-bar:focus { border-color: var(--accent); }
+  #search-bar::placeholder { color: var(--text3); }
+  .topbar-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+  .icon-btn { background: none; border: none; color: var(--text2); font-size: 1.2rem; cursor: pointer; padding: 6px; border-radius: 6px; transition: color 0.2s, background 0.2s; }
+  .icon-btn:hover { color: var(--text); background: var(--bg3); }
+
+  #main { display: flex; flex: 1; }
+  #sidebar {
+    width: 260px; min-width: 260px; background: var(--bg2);
+    border-right: 1px solid var(--border); display: flex;
+    flex-direction: column; height: calc(100vh - 56px);
+    position: sticky; top: 56px; overflow-y: auto; transition: transform 0.3s;
+  }
+  #content { flex: 1; padding: 24px; overflow-y: auto; min-width: 0; }
+
+  /* ── Sidebar ── */
+  .sidebar-section { padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .sidebar-section:last-child { border-bottom: none; }
+  .sidebar-header {
+    padding: 8px 16px; font-size: 0.7rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.5px; color: var(--text3);
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 16px; cursor: pointer; border-radius: 0;
+    transition: background 0.15s, color 0.15s; font-size: 0.88rem; color: var(--text2);
+    border: none; background: none; width: 100%; text-align: left;
+  }
+  .nav-item:hover { background: var(--bg3); color: var(--text); }
+  .nav-item.active { background: var(--bg3); color: var(--accent); border-left: 3px solid var(--accent); }
+  .nav-item .tag-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .nav-item .count { margin-left: auto; font-size: 0.75rem; background: var(--bg4); padding: 1px 7px; border-radius: 10px; color: var(--text3); }
+
+  /* ── Protocol Set Selector ── */
+  #set-selector {
+    padding: 12px 16px; background: var(--bg3); border-bottom: 1px solid var(--border);
+  }
+  #set-selector select {
+    width: 100%; background: var(--bg2); border: 1px solid var(--border);
+    color: var(--text); padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; cursor: pointer;
+  }
+
+  /* ── Cards & Protocol List ── */
+  .page { display: none; animation: fadeIn 0.2s ease; }
+  .page.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .home-header {
+    background: linear-gradient(135deg, var(--bg3) 0%, var(--bg2) 100%);
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 24px; margin-bottom: 24px;
+  }
+  .home-header h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 4px; }
+  .home-header .subtitle { color: var(--text2); font-size: 0.9rem; }
+  .meta-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 12px; border-radius: 16px; font-size: 0.78rem; font-weight: 600;
+  }
+  .badge-blue { background: rgba(41,121,255,0.15); color: var(--accent); border: 1px solid rgba(41,121,255,0.3); }
+  .badge-green { background: rgba(0,200,83,0.12); color: var(--green); border: 1px solid rgba(0,200,83,0.3); }
+  .badge-orange { background: rgba(255,152,0,0.12); color: var(--orange); border: 1px solid rgba(255,152,0,0.3); }
+  .badge-red { background: rgba(244,67,54,0.12); color: var(--red); border: 1px solid rgba(244,67,54,0.3); }
+
+  .section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 14px; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .protocol-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .protocol-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 16px; cursor: pointer; transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+    position: relative; overflow: hidden;
+  }
+  .protocol-card::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+  }
+  .protocol-card:hover { transform: translateY(-2px); border-color: var(--accent); box-shadow: var(--shadow); }
+  .protocol-card .card-title { font-weight: 600; font-size: 0.95rem; margin-bottom: 6px; }
+  .protocol-card .card-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .level-badge {
+    font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .tag-badge {
+    font-size: 0.7rem; padding: 2px 8px; border-radius: 4px;
+    background: var(--bg3); color: var(--text2); border: 1px solid var(--border);
+  }
+  .bookmark-star { position: absolute; top: 12px; right: 12px; font-size: 1rem; cursor: pointer; color: var(--text3); transition: color 0.2s; }
+  .bookmark-star.active { color: var(--yellow); }
+
+  /* ── Protocol Detail ── */
+  #protocol-detail { display: none; }
+  .protocol-detail-header {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px; margin-bottom: 20px;
+  }
+  .protocol-detail-header h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: 8px; }
+  .detail-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .back-btn {
+    display: inline-flex; align-items: center; gap: 6px; background: none;
+    border: 1px solid var(--border); color: var(--text2); padding: 6px 14px;
+    border-radius: 6px; cursor: pointer; font-size: 0.85rem; margin-bottom: 12px;
+    transition: background 0.2s, color 0.2s;
+  }
+  .back-btn:hover { background: var(--bg3); color: var(--text); }
+  .protocol-body {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px;
+  }
+  .protocol-body h1, .protocol-body h2, .protocol-body h3 { margin: 1em 0 0.5em; color: var(--text); }
+  .protocol-body h1 { font-size: 1.4rem; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  .protocol-body h2 { font-size: 1.15rem; color: var(--accent); }
+  .protocol-body h3 { font-size: 1rem; color: var(--text2); }
+  .protocol-body p { line-height: 1.7; margin-bottom: 0.8em; color: var(--text); }
+  .protocol-body ul, .protocol-body ol { padding-left: 1.5em; margin-bottom: 0.8em; }
+  .protocol-body li { line-height: 1.7; margin-bottom: 4px; }
+  .protocol-body table { width: 100%; border-collapse: collapse; margin-bottom: 1em; font-size: 0.9rem; }
+  .protocol-body th { background: var(--bg3); padding: 8px 12px; text-align: left; border: 1px solid var(--border); }
+  .protocol-body td { padding: 8px 12px; border: 1px solid var(--border); }
+  .protocol-body code { background: var(--bg3); padding: 2px 6px; border-radius: 4px; font-size: 0.85rem; }
+  .protocol-body blockquote { border-left: 3px solid var(--accent); padding-left: 16px; color: var(--text2); margin-bottom: 0.8em; }
+  .protocol-body a[href^="protocol:"] { color: var(--accent); cursor: pointer; text-decoration: underline; }
+  .protocol-body hr { border: none; border-top: 1px solid var(--border); margin: 1.5em 0; }
+
+  /* ── Skill-level sections (colours injected dynamically via JS) ── */
+  .skill-section {
+    border-left: 5px solid #888;
+    border-radius: 0 8px 8px 0;
+    margin: 14px 0 6px 0;
+    padding: 0;
+    overflow: hidden;
+  }
+  .skill-section-header {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 14px;
+    font-size: 0.72rem; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 1.2px;
+    color: #fff;
+    user-select: none;
+  }
+  .skill-section-header .skill-icon { font-size: 0.95rem; }
+  .skill-section-body {
+    padding: 12px 16px 6px 16px;
+    background: var(--card);
+  }
+  .skill-section-body > *:last-child { margin-bottom: 0; }
+
+  /* Legend strip shown at top of every protocol */
+  .skill-legend {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-bottom: 18px; padding: 10px 14px;
+    background: var(--bg3); border: 1px solid var(--border); border-radius: 8px;
+    font-size: 0.78rem;
+  }
+  .skill-legend-item {
+    display: flex; align-items: center; gap: 5px; font-weight: 700;
+  }
+  .skill-legend-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+
+  /* ── Calculators ── */
+  .calc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+  .calc-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px; cursor: pointer; transition: border-color 0.2s;
+  }
+  .calc-card:hover { border-color: var(--accent); }
+  .calc-card h3 { font-size: 1rem; margin-bottom: 6px; }
+  .calc-card p { font-size: 0.85rem; color: var(--text2); }
+  .calc-modal {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    z-index: 1000; align-items: center; justify-content: center; padding: 20px;
+  }
+  .calc-modal.open { display: flex; }
+  .calc-content {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 28px; max-width: 480px; width: 100%; max-height: 90vh; overflow-y: auto;
+    box-shadow: var(--shadow);
+  }
+  .calc-content h2 { font-size: 1.2rem; margin-bottom: 16px; }
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-size: 0.85rem; color: var(--text2); margin-bottom: 5px; }
+  .form-group input, .form-group select {
+    width: 100%; background: var(--bg3); border: 1px solid var(--border);
+    color: var(--text); padding: 8px 12px; border-radius: 6px; font-size: 0.9rem; outline: none;
+  }
+  .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
+  .calc-result {
+    background: var(--bg3); border: 1px solid var(--border); border-radius: 8px;
+    padding: 16px; margin-top: 16px; font-size: 1rem;
+  }
+  .calc-result .result-value { font-size: 1.5rem; font-weight: 700; color: var(--accent); }
+  .calc-result .result-label { font-size: 0.85rem; color: var(--text2); margin-top: 4px; }
+  .btn { padding: 8px 20px; border-radius: 6px; border: none; cursor: pointer; font-size: 0.9rem; font-weight: 600; transition: opacity 0.2s; }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-secondary { background: var(--bg4); color: var(--text); }
+  .btn:hover { opacity: 0.85; }
+  .btn-row { display: flex; gap: 10px; margin-top: 16px; }
+
+  /* ── Admin ── */
+  .admin-section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; }
+  .admin-section h3 { font-size: 1rem; font-weight: 700; margin-bottom: 14px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.78rem; }
+  .input-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .input-field {
+    background: var(--bg3); border: 1px solid var(--border); color: var(--text);
+    padding: 7px 12px; border-radius: 6px; font-size: 0.9rem; outline: none; flex: 1; min-width: 160px;
+  }
+  .input-field:focus { border-color: var(--accent); }
+  .tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .tag-item {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; font-size: 0.85rem;
+  }
+  .tag-item .color-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .tag-remove { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 1rem; padding: 0 2px; }
+  .tag-remove:hover { color: var(--red); }
+  .level-list { display: flex; flex-direction: column; gap: 8px; }
+  .level-item { display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; }
+  .level-color-box { width: 24px; height: 24px; border-radius: 4px; flex-shrink: 0; cursor: pointer; border: 2px solid var(--border); }
+  .level-name { flex: 1; font-weight: 600; }
+  .protocol-editor {
+    background: var(--bg3); border: 1px solid var(--border); border-radius: 6px;
+    padding: 10px 14px; width: 100%; color: var(--text); font-size: 0.9rem; font-family: 'Consolas', monospace;
+    resize: vertical; outline: none; min-height: 200px;
+  }
+  .protocol-editor:focus { border-color: var(--accent); }
+  .editor-preview { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; min-height: 100px; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 10px; }
+  .tab {
+    padding: 5px 14px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;
+    background: var(--bg3); border: 1px solid var(--border); color: var(--text2); font-weight: 600;
+  }
+  .tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .protocol-list-admin { display: flex; flex-direction: column; gap: 6px; max-height: 300px; overflow-y: auto; }
+  .admin-protocol-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 0.88rem; }
+  .admin-protocol-item:hover { border-color: var(--accent); }
+
+  /* ── Login ── */
+  #login-modal {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75);
+    z-index: 2000; align-items: center; justify-content: center;
+  }
+  #login-modal.open { display: flex; }
+  .login-box {
+    background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 32px; max-width: 340px; width: 100%; box-shadow: var(--shadow);
+  }
+  .login-box h2 { font-size: 1.2rem; margin-bottom: 6px; }
+  .login-box p { font-size: 0.85rem; color: var(--text2); margin-bottom: 20px; }
+
+  /* ── Search Results ── */
+  .search-results { display: flex; flex-direction: column; gap: 10px; }
+  .search-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; cursor: pointer; transition: border-color 0.2s; }
+  .search-item:hover { border-color: var(--accent); }
+  .search-item h4 { font-size: 0.95rem; margin-bottom: 4px; }
+  .search-item p { font-size: 0.82rem; color: var(--text2); }
+  .search-highlight { background: rgba(41,121,255,0.3); border-radius: 2px; }
+  .no-results { text-align: center; padding: 40px; color: var(--text3); }
+
+  /* ── Toast ── */
+  #toast {
+    position: fixed; bottom: 20px; right: 20px; z-index: 3000;
+    background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px 20px; box-shadow: var(--shadow); font-size: 0.88rem;
+    transform: translateY(80px); opacity: 0; transition: all 0.3s; pointer-events: none;
+  }
+  #toast.show { transform: translateY(0); opacity: 1; }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    #menu-btn { display: flex; }
+    #sidebar {
+      position: fixed; left: 0; top: 56px; bottom: 0; z-index: 200;
+      transform: translateX(-100%); width: 280px;
+    }
+    #sidebar.open { transform: translateX(0); box-shadow: 4px 0 20px rgba(0,0,0,0.5); }
+    #content { padding: 16px; }
+    .protocol-grid { grid-template-columns: 1fr; }
+    .calc-grid { grid-template-columns: 1fr; }
+    #search-bar { max-width: 100%; }
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg2); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+  .color-swatch { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .swatch { width: 24px; height: 24px; border-radius: 4px; cursor: pointer; border: 2px solid transparent; transition: border-color 0.2s; }
+  .swatch:hover, .swatch.selected { border-color: var(--text); }
+
+  .refresh-spinner { animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .inline-block { display: inline-block; }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- TOP BAR -->
+  <div id="topbar">
+    <button id="menu-btn" onclick="toggleSidebar()">☰</button>
+    <div class="logo"><span class="cross">✚</span> <span>Med</span>Command</div>
+    <input type="text" id="search-bar" placeholder="Search protocols, medications, procedures…" oninput="handleSearch(this.value)">
+    <div class="topbar-actions">
+      <span id="server-badge" class="badge badge-orange" style="font-size:0.75rem;cursor:default;" title="Checking server…">⏳ Connecting</span>
+      <button class="icon-btn" onclick="toggleTheme()" title="Toggle Day/Night">🌙</button>
+      <button class="icon-btn" onclick="showPage('bookmarks')" title="Bookmarks">⭐</button>
+      <button class="icon-btn" onclick="openAdminLogin()" title="Admin Settings">⚙️</button>
+    </div>
+  </div>
+
+  <div id="main">
+    <!-- SIDEBAR -->
+    <div id="sidebar">
+      <div id="set-selector">
+        <select id="protocol-set-select" onchange="changeProtocolSet(this.value)">
+        </select>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-header">Navigation</div>
+        <button class="nav-item active" id="nav-home" onclick="showPage('home')">🏠 <span>Home</span></button>
+        <button class="nav-item" id="nav-search" onclick="showPage('search')">🔍 <span>Search</span></button>
+        <button class="nav-item" id="nav-calculators" onclick="showPage('calculators')">🧮 <span>Calculators</span></button>
+        <button class="nav-item" id="nav-bookmarks" onclick="showPage('bookmarks')">⭐ <span>Bookmarks</span></button>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-header">Categories</div>
+        <div id="tag-nav"></div>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-header">Skill Levels</div>
+        <div id="level-filter-nav"></div>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div id="content">
+
+      <!-- HOME PAGE -->
+      <div id="page-home" class="page active">
+        <div class="home-header">
+          <h1 id="home-title">EMS Protocols</h1>
+          <div class="subtitle" id="home-subtitle">Select a protocol category or search to begin</div>
+          <div class="meta-badges">
+            <span class="badge badge-green">🟢 <span id="home-status">Current</span></span>
+            <span class="badge badge-blue">🔄 Last Refresh: <span id="last-refresh">Never</span></span>
+            <span class="badge badge-orange">📋 <span id="protocol-count">0</span> Protocols</span>
+          </div>
+        </div>
+        <div id="home-sections"></div>
+      </div>
+
+      <!-- SEARCH PAGE -->
+      <div id="page-search" class="page">
+        <div class="section-title">🔍 Search Results</div>
+        <div id="search-results-list" class="search-results">
+          <div class="no-results">Start typing to search protocols…</div>
+        </div>
+      </div>
+
+      <!-- PROTOCOL DETAIL -->
+      <div id="page-protocol" class="page">
+        <button class="back-btn" onclick="goBack()">← Back</button>
+        <div class="protocol-detail-header">
+          <h2 id="detail-title"></h2>
+          <div class="detail-meta" id="detail-meta"></div>
+        </div>
+        <div class="protocol-body" id="detail-body"></div>
+      </div>
+
+      <!-- CALCULATORS PAGE -->
+      <div id="page-calculators" class="page">
+        <div class="section-title">🧮 Clinical Calculators</div>
+        <div class="calc-grid" id="calc-grid"></div>
+      </div>
+
+      <!-- BOOKMARKS PAGE -->
+      <div id="page-bookmarks" class="page">
+        <div class="section-title">⭐ Bookmarked Protocols</div>
+        <div id="bookmarks-list" class="protocol-grid"></div>
+      </div>
+
+      <!-- ADMIN PAGE -->
+      <div id="page-admin" class="page">
+        <div class="section-title">⚙️ Admin Settings</div>
+
+        <div class="admin-section">
+          <h3>Protocol Sets</h3>
+          <div class="input-row">
+            <input type="text" class="input-field" id="new-set-name" placeholder="Set name (e.g. ALS Protocols 2025)">
+            <input type="text" class="input-field" id="new-set-url" placeholder="Refresh URL (optional)">
+            <button class="btn btn-primary" onclick="addProtocolSet()">Add Set</button>
+          </div>
+          <div id="set-list" style="margin-top:12px; display:flex; flex-direction:column; gap:8px;"></div>
+        </div>
+
+        <div class="admin-section">
+          <h3>Manage Protocols</h3>
+          <div style="margin-bottom:10px">
+            <button class="btn btn-primary" onclick="openProtocolEditor(null)">+ New Protocol</button>
+          </div>
+          <div id="admin-protocol-list" class="protocol-list-admin"></div>
+        </div>
+
+        <div class="admin-section">
+          <h3>Category Tags</h3>
+          <div class="input-row">
+            <input type="text" class="input-field" id="new-tag-name" placeholder="Tag name">
+            <input type="color" id="new-tag-color" value="#2979ff" style="width:40px;height:32px;border:none;cursor:pointer;background:none;border-radius:4px;">
+            <button class="btn btn-primary" onclick="addTag()">Add Tag</button>
+          </div>
+          <div id="admin-tag-list" class="tag-list" style="margin-top:12px;"></div>
+        </div>
+
+        <div class="admin-section">
+          <h3>Skill Level Colors</h3>
+          <div id="admin-levels-list" class="level-list"></div>
+          <div style="margin-top:12px;" class="input-row">
+            <input type="text" class="input-field" id="new-level-name" placeholder="Level name (e.g. EMT-B)">
+            <input type="color" id="new-level-color" value="#00c853" style="width:40px;height:32px;border:none;cursor:pointer;background:none;border-radius:4px;">
+            <button class="btn btn-primary" onclick="addLevel()">Add Level</button>
+          </div>
+        </div>
+
+        <div class="admin-section">
+          <h3>Admin Password</h3>
+          <div class="input-row">
+            <input type="password" class="input-field" id="new-password" placeholder="New password">
+            <button class="btn btn-primary" onclick="changePassword()">Update</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- CALCULATOR MODAL -->
+<div id="calc-modal" class="calc-modal">
+  <div class="calc-content">
+    <h2 id="calc-title"></h2>
+    <div id="calc-fields"></div>
+    <div id="calc-result" class="calc-result" style="display:none;"></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="runCalc()">Calculate</button>
+      <button class="btn btn-secondary" onclick="closeCalc()">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROTOCOL EDITOR MODAL -->
+<div id="editor-modal" class="calc-modal">
+  <div class="calc-content" style="max-width:700px;width:100%;">
+    <h2 id="editor-title">Edit Protocol</h2>
+    <div class="form-group">
+      <label>Title</label>
+      <input type="text" class="input-field" id="edit-prot-title" style="width:100%">
+    </div>
+    <div class="form-group">
+      <label>Protocol Set</label>
+      <select class="input-field" id="edit-prot-set" style="width:100%"></select>
+    </div>
+    <div class="form-group">
+      <label>Tags (comma separated)</label>
+      <input type="text" class="input-field" id="edit-prot-tags" style="width:100%" placeholder="medical, trauma">
+    </div>
+    <div class="form-group">
+      <label>Skill Level</label>
+      <select class="input-field" id="edit-prot-level" style="width:100%"></select>
+    </div>
+    <div class="form-group">
+      <label>Revision Date</label>
+      <input type="date" class="input-field" id="edit-prot-revised" style="width:100%">
+    </div>
+    <div class="form-group">
+      <label>Content (CommonMark Markdown)</label>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 12px;margin-bottom:8px;font-size:0.78rem;color:var(--text2);line-height:1.7;">
+        <strong style="color:var(--text);">Skill-level sections</strong> — wrap any block of steps in a fence using the level's ID:<br>
+        <code style="background:var(--bg4);padding:1px 6px;border-radius:3px;color:var(--accent);">:::</code><em>levelid</em>
+        &nbsp;…content…&nbsp;
+        <code style="background:var(--bg4);padding:1px 6px;border-radius:3px;color:var(--accent);">:::</code>
+        &nbsp;— e.g.&nbsp;
+        <code style="background:var(--bg4);padding:1px 6px;border-radius:3px;color:var(--accent);">::: emt</code> … <code style="background:var(--bg4);padding:1px 6px;border-radius:3px;color:var(--accent);">:::</code>
+        &nbsp;then&nbsp;
+        <code style="background:var(--bg4);padding:1px 6px;border-radius:3px;color:var(--accent);">::: paramedic</code> … <code style="background:var(--bg4);padding:1px 6px;border-radius:3px;color:var(--accent);">:::</code>.
+        Sections can repeat and interleave freely. Use the <strong>Preview</strong> tab to verify rendering.
+      </div>
+      <div class="tabs">
+        <div class="tab active" onclick="switchEditorTab('write')">Write</div>
+        <div class="tab" onclick="switchEditorTab('preview')">Preview</div>
+      </div>
+      <textarea id="edit-prot-content" class="protocol-editor"></textarea>
+      <div id="editor-preview" class="editor-preview protocol-body" style="display:none;"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveProtocol()">Save</button>
+      <button class="btn btn-secondary" onclick="closeEditor()">Cancel</button>
+      <button class="btn" style="background:rgba(244,67,54,0.15);color:var(--red);margin-left:auto;" onclick="deleteProtocol()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN MODAL -->
+<div id="login-modal" class="calc-modal">
+  <div class="login-box">
+    <h2>🔐 Admin Access</h2>
+    <p>Enter admin password to access settings</p>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" class="input-field" id="admin-password-input" style="width:100%" onkeydown="if(event.key==='Enter')checkAdminLogin()">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="checkAdminLogin()">Login</button>
+      <button class="btn btn-secondary" onclick="closeAdminLogin()">Cancel</button>
+    </div>
+    <div id="login-error" style="color:var(--red);font-size:0.82rem;margin-top:8px;display:none;">Incorrect password</div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════════
+// API + STATE LAYER
+// ══════════════════════════════════════════════════
+
+// Detect whether we are running against the Node server or standalone.
+// When served from the Node server, /api/state will respond with JSON.
+// When opened as a local file or plain static host, all API calls will
+// fail gracefully and the app falls back to localStorage.
+
+const API = '/api';
+let adminToken = null;          // set after successful /api/auth
+let serverMode = false;         // true once we confirm the API is reachable
+
+const STORE_KEY = 'medcmd_data';
+let state = {
+  darkMode: true,
+  lastRefresh: null,
+  activeSet: null,
+  bookmarks: [],        // bookmarks stay local — they are per-user
+  sets: [
+    { id: 'set1', name: 'ALS Protocols 2025', url: '' },
+    { id: 'set2', name: 'BLS Protocols 2025', url: '' }
+  ],
+  tags: [
+    { id: 'medical',        name: 'Medical',        color: '#2979ff' },
+    { id: 'trauma',         name: 'Trauma',         color: '#f44336' },
+    { id: 'pediatric',      name: 'Pediatric',      color: '#ff9800' },
+    { id: 'cardiology',     name: 'Cardiology',     color: '#e91e63' },
+    { id: 'respiratory',    name: 'Respiratory',    color: '#00bcd4' },
+    { id: 'obstetrics',     name: 'Obstetrics',     color: '#9c27b0' },
+    { id: 'procedure',      name: 'Procedure',      color: '#607d8b' },
+    { id: 'administrative', name: 'Administrative', color: '#795548' },
+    { id: 'appendix',       name: 'Appendix',       color: '#9e9e9e' }
+  ],
+  levels: [
+    { id: 'emt',       name: 'EMT',       color: '#2979ff' },
+    { id: 'aemt',      name: 'AEMT',      color: '#00bcd4' },
+    { id: 'paramedic', name: 'Paramedic', color: '#9c27b0' }
+  ],
+  protocols: [],
+  adminPassword: 'admin123'   // only used in localStorage/standalone mode
+};
+
+let currentPage = 'home';
+let pageHistory = ['home'];
+let currentCalc = null;
+let editingProtocolId = null;
+let activeLevelFilter = null;
+let activeTagFilter = null;
+
+// ── API helpers ──────────────────────────────────
+function authHeaders() {
+  const h = { 'Content-Type': 'application/json' };
+  if (adminToken) h['Authorization'] = 'Bearer ' + adminToken;
+  return h;
+}
+
+async function apiGet(path) {
+  const r = await fetch(API + path);
+  if (!r.ok) throw new Error(r.status);
+  return r.json();
+}
+
+async function apiPost(path, body) {
+  const r = await fetch(API + path, { method: 'POST', headers: authHeaders(), body: JSON.stringify(body) });
+  if (!r.ok) { const e = await r.json().catch(()=>({error:r.status})); throw new Error(e.error || r.status); }
+  return r.json();
+}
+
+async function apiPut(path, body) {
+  const r = await fetch(API + path, { method: 'PUT', headers: authHeaders(), body: JSON.stringify(body) });
+  if (!r.ok) { const e = await r.json().catch(()=>({error:r.status})); throw new Error(e.error || r.status); }
+  return r.json();
+}
+
+async function apiDelete(path) {
+  const r = await fetch(API + path, { method: 'DELETE', headers: authHeaders() });
+  if (!r.ok) { const e = await r.json().catch(()=>({error:r.status})); throw new Error(e.error || r.status); }
+  return r.json();
+}
+
+// ── localStorage helpers (standalone / offline mode) ──
+function loadLocalState() {
+  try {
+    const saved = localStorage.getItem(STORE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Bookmarks always come from local storage
+      state = { ...state, ...parsed };
+    }
+  } catch(e) {}
+  if (!state.protocols.length) loadDefaultProtocols();
+  if (!state.activeSet && state.sets.length) state.activeSet = state.sets[0].id;
+}
+
+function saveLocalState() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+
+// ── Unified save — writes to server if online, always writes bookmarks/UI prefs locally ──
+function saveState() {
+  // Always save bookmarks and UI preferences locally
+  try {
+    const localOnly = { bookmarks: state.bookmarks, darkMode: state.darkMode, activeSet: state.activeSet };
+    localStorage.setItem('medcmd_local', JSON.stringify(localOnly));
+  } catch(e) {}
+}
+
+// Persist a full admin change to server (sets, tags, levels)
+async function pushStateToServer() {
+  if (!serverMode || !adminToken) return;
+  try {
+    await apiPut('/state', {
+      sets: state.sets,
+      tags: state.tags,
+      levels: state.levels,
+      lastRefresh: state.lastRefresh
+    });
+  } catch(e) { /* ignore — data is still in memory */ }
+}
+
+// ── Boot: try server first, fall back to localStorage ──
+async function loadState() {
+  // Always restore local-only prefs first
+  try {
+    const loc = JSON.parse(localStorage.getItem('medcmd_local') || '{}');
+    if (loc.bookmarks) state.bookmarks = loc.bookmarks;
+    if (typeof loc.darkMode !== 'undefined') state.darkMode = loc.darkMode;
+    if (loc.activeSet) state.activeSet = loc.activeSet;
+  } catch(e) {}
+
+  try {
+    const serverState = await apiGet('/state');
+    serverMode = true;
+    // Merge server state into local state (server wins for protocols/sets/tags/levels)
+    state.sets      = serverState.sets      || state.sets;
+    state.tags      = serverState.tags      || state.tags;
+    state.levels    = serverState.levels    || state.levels;
+    state.protocols = serverState.protocols || state.protocols;
+    state.lastRefresh = serverState.lastRefresh || new Date().toISOString();
+    if (!state.activeSet || !state.sets.find(s => s.id === state.activeSet)) {
+      state.activeSet = state.sets[0]?.id || null;
+    }
+    updateServerBadge(true);
+  } catch(e) {
+    // Server not available — fall back to localStorage
+    serverMode = false;
+    loadLocalState();
+    updateServerBadge(false);
+  }
+}
+
+function updateServerBadge(online) {
+  const el = document.getElementById('server-badge');
+  if (!el) return;
+  if (online) {
+    el.textContent = '🟢 Server';
+    el.title = 'Connected to MedCommand server — changes sync to all devices';
+    el.style.color = 'var(--green)';
+  } else {
+    el.textContent = '🟡 Local';
+    el.title = 'Running in standalone mode — changes saved to this browser only';
+    el.style.color = 'var(--yellow)';
+  }
+}
+
+// ══════════════════════════════════════════════════
+// DEFAULT SAMPLE PROTOCOLS
+// ══════════════════════════════════════════════════
+function loadDefaultProtocols() {
+  state.protocols = [
+    {
+      id: 'p001', setId: 'set1', title: 'Chest Pain / ACS',
+      tags: ['cardiology', 'medical'], level: 'paramedic',
+      revised: '2025-01-15',
+      content: `## Chest Pain / ACS Protocol
+
+**Indications:** Chest pain, pressure, tightness, or discomfort suggestive of acute coronary syndrome.
+
+---
+
+### Scene Safety & Initial Assessment
+- Ensure scene safety and BSI precautions
+- Obtain history: OPQRST, SAMPLE
+- Vitals including SpO2 and 12-lead ECG as soon as possible
+
+---
+
+::: emt
+### EMT Interventions
+- Oxygen via NRB if SpO2 < 94% — titrate to effect
+- **Aspirin 324 mg PO** (chewable) — confirm no allergy or active GI bleeding
+- Position of comfort (semi-Fowler preferred)
+- Assist patient with their own prescribed nitroglycerin if available
+- Obtain and record vital signs every 5 minutes
+- Rapid transport; notify receiving facility
+:::
+
+::: aemt
+### AEMT Interventions
+- All EMT interventions above
+- Establish IV/IO access — large bore, antecubital
+- 12-lead acquisition and interpretation
+- Nitroglycerin 0.4 mg SL q5 min x3 if SBP > 90 and no PDE-5 inhibitor use within 48h
+:::
+
+::: paramedic
+### Paramedic Interventions
+- All AEMT interventions above
+- Transmit 12-lead ECG to receiving facility
+- Morphine 2-4mg IV/IM if pain unrelieved (use cautiously)
+- Heparin per STEMI activation protocol if criteria met
+
+### STEMI Criteria
+- >= 1mm ST elevation in 2 contiguous limb leads
+- >= 2mm ST elevation in 2 contiguous precordial leads
+- New or presumed new LBBB
+
+> **STEMI Alert:** Notify receiving facility immediately. Goal door-to-balloon < 90 minutes.
+:::
+
+---
+
+### Related Protocols
+- See [Cardiac Arrest](protocol:p003)
+- See [Respiratory Distress](protocol:p002) if dyspnea is primary complaint
+`
+    },
+    {
+      id: 'p002', setId: 'set1', title: 'Respiratory Distress',
+      tags: ['respiratory', 'medical'], level: 'emt',
+      revised: '2025-02-01',
+      content: `## Respiratory Distress Protocol
+
+**Indications:** Chest pain, pressure, tightness, or discomfort suggestive of acute coronary syndrome.
+
+---
+
+### Scene Safety & Initial Assessment
+- Ensure scene safety and BSI
+- Obtain 12-lead ECG as soon as possible
+- Establish IV access
+
+### EMT Interventions
+- Oxygen if SpO2 < 94%
+- Aspirin 324mg PO (chewable) if no contraindications
+- Position of comfort (semi-fowler)
+- Obtain vital signs q5 minutes
+
+### Paramedic Interventions
+- 12-lead ECG with transmission to receiving facility
+- Nitroglycerin 0.4mg SL q5 min x3 (SBP > 90, no PDE-5 inhibitor use in 48h)
+- Morphine 2-4mg IV/IM if pain unrelieved (use cautiously)
+- Heparin per STEMI protocol if activated
+
+### STEMI Criteria
+- ≥1mm ST elevation in 2 contiguous leads (limb)
+- ≥2mm ST elevation in 2 contiguous precordial leads
+- New LBBB
+
+> **⚠️ STEMI Alert:** Notify receiving facility immediately. Goal door-to-balloon < 90 minutes.
+
+### Related Protocols
+- See [protocol:p003](protocol:p003) for Cardiac Arrest
+- See [protocol:p005](protocol:p005) for Nitroglycerin administration
+`
+    },
+    {
+      id: 'p002', setId: 'set1', title: 'Respiratory Distress',
+      tags: ['respiratory', 'medical'], level: 'emt',
+      revised: '2025-02-01',
+      content: `## Respiratory Distress Protocol
+
+**Indications:** Patient presenting with difficulty breathing, wheezing, stridor, or hypoxia.
+
+---
+
+### Initial Assessment
+- Assess work of breathing: retractions, accessory muscle use, tripod positioning
+- SpO2, respiratory rate, lung sounds bilaterally
+- Mental status — agitation or somnolence indicates severity
+
+---
+
+::: emt
+### EMT Interventions
+- High-flow O2 via NRB mask; titrate to SpO2 >= 94%
+- Position of comfort — upright preferred
+- Albuterol 2.5 mg via nebulizer (if agency protocol permits)
+- Assist ventilations with BVM if respiratory effort is inadequate
+:::
+
+::: aemt
+### AEMT Interventions
+- All EMT interventions above
+- IV/IO access
+- Ipratropium 0.5 mg nebulized if bronchospasm (may combine with albuterol)
+- CPAP 5-10 cmH2O for suspected pulmonary edema or severe COPD exacerbation
+:::
+
+::: paramedic
+### Paramedic Interventions
+- All AEMT interventions above
+- Albuterol 2.5 mg + Ipratropium 0.5 mg combined nebulization (repeat x3 PRN)
+- Epinephrine 1:1000 0.3-0.5 mg IM for anaphylaxis or refractory bronchospasm
+- Methylprednisolone 125 mg IV for severe asthma/COPD exacerbation
+- Consider RSI for impending respiratory failure (GCS <= 8, SpO2 not improving)
+:::
+
+---
+
+### Differential Diagnosis
+| Condition | Key Finding |
+|-----------|-------------|
+| Asthma | Expiratory wheeze, prolonged expiration |
+| COPD | Barrel chest, pursed lips, history |
+| CHF / Pulmonary Edema | Crackles, orthopnea, JVD |
+| Anaphylaxis | Urticaria, hypotension, stridor |
+| Pneumothorax | Absent breath sounds, tracheal deviation |
+
+> See [Chest Pain / ACS](protocol:p001) if chest pain accompanies dyspnea.
+`
+    },
+    {
+      id: 'p003', setId: 'set1', title: 'Cardiac Arrest — Adult',
+      tags: ['cardiology', 'medical'], level: 'emt',
+      revised: '2025-01-20',
+      content: `## Cardiac Arrest — Adult Protocol
+
+**Indications:** Unresponsive, apneic, pulseless patient >= 8 years old.
+
+---
+
+::: emt
+### Immediate Actions — All Providers
+1. Confirm cardiac arrest: unresponsive, apneic, pulseless
+2. Begin **high-quality CPR** immediately
+   - Rate: 100-120 compressions/min
+   - Depth: >= 2 inches (avoid > 2.4 inches)
+   - Allow full chest recoil
+   - Minimize interruptions (< 10 seconds)
+3. Apply AED/defibrillator as soon as available
+4. Rhythm check every 2 minutes
+
+### Shockable Rhythms (VF / pVT)
+- Defibrillate at 200J biphasic (or per manufacturer)
+- Resume CPR immediately after shock — do not pause to recheck pulse
+:::
+
+::: aemt
+### AEMT Interventions
+- All EMT interventions above
+- IO access if IV not rapidly obtainable
+- Supraglottic airway (iGel, King LT) — confirm with capnography
+- Epinephrine 1 mg IV/IO every 3-5 minutes
+:::
+
+::: paramedic
+### Paramedic Interventions
+- All AEMT interventions above
+- Endotracheal intubation with continuous waveform capnography
+- **Shockable:** Amiodarone 300 mg IV/IO after 3rd shock; 150 mg after 5th
+- **Non-shockable (PEA/Asystole):** Epinephrine 1 mg q3-5 min; treat H's and T's
+
+### H's and T's
+**H's:** Hypovolemia · Hypoxia · Hydrogen ion (acidosis) · Hypo/Hyperkalemia · Hypothermia
+
+**T's:** Tension pneumothorax · Tamponade · Toxins · Thrombosis (PE or MI)
+
+### Capnography
+- PETCO2 >= 10 mmHg = adequate CPR quality
+- Sudden rise >= 40 mmHg = likely ROSC — check pulse
+:::
+
+> **Post-ROSC:** 12-lead ECG, targeted temperature management, transport to PCI-capable facility.
+`
+    },
+    {
+      id: 'p004', setId: 'set1', title: 'Pediatric Fever & Seizure',
+      tags: ['pediatric', 'medical'], level: 'emt',
+      revised: '2024-12-10',
+      content: `## Pediatric Fever & Seizure Protocol
+
+**Indications:** Pediatric patient with fever, febrile seizure, or active seizure activity.
+
+---
+
+### Pediatric Normal Vitals Reference
+| Age | HR | RR | SBP |
+|-----|----|----|-----|
+| Newborn | 120-160 | 30-60 | 60-90 |
+| Infant (1-12 mo) | 100-160 | 25-50 | 70-100 |
+| Toddler (1-3 yr) | 90-150 | 20-30 | 80-110 |
+| School Age (6-12 yr) | 70-120 | 15-20 | 90-120 |
+
+---
+
+::: emt
+### EMT — Fever Management
+- Remove excessive clothing; tepid environment
+- Acetaminophen 15 mg/kg PO/PR (max 650 mg)
+- Ibuprofen 10 mg/kg PO if > 6 months (max 400 mg)
+- Supplemental oxygen; position of comfort
+
+### EMT — Active Seizure (< 5 minutes)
+- Protect from injury; do not restrain
+- Lateral recovery position after seizure ends
+- Check blood glucose; oxygen via NRB
+
+### EMT — Prolonged Seizure (> 5 minutes)
+- Midazolam 0.2 mg/kg **IN or IM** (max 10 mg) — per agency protocol
+:::
+
+::: aemt
+### AEMT Interventions
+- All EMT interventions above
+- IV/IO access
+- Dextrose 0.5-1 g/kg IV/IO if glucose < 60 mg/dL
+:::
+
+::: paramedic
+### Paramedic Interventions
+- All AEMT interventions above
+- Lorazepam 0.1 mg/kg IV/IO (max 4 mg) — preferred if IV available
+- If seizures persist after 2nd benzodiazepine: Phenobarbital 15-20 mg/kg IV/IO (slow push)
+- Monitor for respiratory depression after every dose — have BVM ready
+
+> **Caution:** Respiratory depression risk increases with each dose. Maintain airway vigilance.
+:::
+
+---
+
+### Post-Ictal Care
+- Maintain airway; recovery position when safe
+- Monitor SpO2 and vital signs continuously
+- Determine cause: febrile, epileptic, hypoglycemic, traumatic
+`
+    },
+    {
+      id: 'p005', setId: 'set1', title: 'Obstetric Emergency — Delivery',
+      tags: ['obstetrics', 'medical'], level: 'emt',
+      revised: '2025-03-01',
+      content: `## Obstetric Emergency — Field Delivery
+
+**Indications:** Imminent delivery or complicated obstetric emergency in the field.
+
+---
+
+::: emt
+### EMT — Assessment
+- Gestational age (weeks), contractions: frequency and duration
+- Urge to push / visible crowning
+- Amniotic fluid: clear vs. meconium-stained (green/brown)
+
+### EMT — Normal Delivery
+1. Position mother supine or left lateral tilt
+2. Apply gentle downward pressure to control head delivery
+3. Check for nuchal cord — if loose, slip over head; if tight, clamp and cut
+4. Deliver anterior shoulder with gentle downward traction
+5. Deliver posterior shoulder with upward traction
+6. Clamp cord 1-2 inches from umbilicus x2; cut between clamps
+7. Dry and stimulate newborn; APGAR at 1 and 5 minutes
+
+### APGAR Score
+| Sign | 0 | 1 | 2 |
+|------|---|---|---|
+| Appearance | Blue/pale | Blue extremities | Pink all over |
+| Pulse | Absent | < 100 | >= 100 |
+| Grimace | None | Grimace | Cry/cough |
+| Activity | Limp | Some flexion | Active motion |
+| Respiration | Absent | Weak/irregular | Strong cry |
+:::
+
+::: aemt
+### AEMT — Neonatal Resuscitation
+- Warm, dry, stimulate
+- If HR < 100: BVM ventilation (21% O2 initially)
+- IV/IO access if fluid resuscitation needed
+:::
+
+::: paramedic
+### Paramedic — Complications
+
+**Prolapsed Cord:**
+- Knee-chest position; elevate presenting part off cord manually
+- High-flow O2; rapid transport — do NOT attempt delivery in field
+
+**Breech Presentation:**
+- Allow body to deliver spontaneously — do not pull
+- Lovset maneuver for arms; Mauriceau maneuver for head
+- Immediate transport if head does not deliver within 3 minutes
+
+**Postpartum Hemorrhage:**
+- Fundal massage
+- Oxytocin 10 units IM or 10-20 units in 1L NS IV infusion per protocol
+:::
+`
+    },
+    {
+      id: 'p006', setId: 'set1', title: 'Trauma — Major Trauma Assessment',
+      tags: ['trauma', 'medical'], level: 'emt',
+      revised: '2025-01-08',
+      content: `## Major Trauma Assessment Protocol
+
+**Goal:** Identify and treat life threats; minimize scene time (<= 10 minutes for critical patients).
+
+---
+
+::: emt
+### Scene Size-Up & MOI
+- BSI, scene safety — hazards, violence, mechanism
+- Determine: blunt vs. penetrating; number of patients; call resources early
+
+### Primary Survey (ABCDE)
+**A — Airway:** Open/maintain; jaw thrust if C-spine concern; suction PRN
+
+**B — Breathing:** Expose chest; seal open wounds (3-sided dressing); BVM if effort inadequate
+
+**C — Circulation:** Direct pressure → wound packing → tourniquet (note time applied)
+
+**D — Disability:** GCS, pupils, blood glucose
+
+**E — Exposure:** Full body exam; log roll; prevent hypothermia (warm blankets)
+
+### Load & Go Criteria
+GCS < 14, SBP < 90, RR < 10 or > 29, penetrating injury to head/neck/torso, unstable pelvis, suspected spinal cord injury
+
+> **Platinum 10:** Scene time <= 10 minutes for critical trauma patients.
+:::
+
+::: aemt
+### AEMT Interventions
+- All EMT interventions above
+- Two large-bore IVs (14-16g); warmed NS or LR
+- Permissive hypotension for penetrating torso trauma: target SBP 80-90 mmHg
+:::
+
+::: paramedic
+### Paramedic Interventions
+- All AEMT interventions above
+- Needle decompression for tension pneumothorax (2nd ICS MCL or 4th/5th ICS AAL)
+- **TXA:** 1 g IV over 10 minutes if within 3 hours of injury
+- RSI for airway control if GCS <= 8 with inability to maintain airway
+- Pericardiocentesis for suspected cardiac tamponade per protocol/medical direction
+
+### Secondary Survey (en route)
+- Head-to-toe reassessment; reassess all interventions; vital signs every 5 minutes
+:::
+`
+    },
+    {
+      id: 'p007', setId: 'set2', title: 'BLS Chest Pain',
+      tags: ['cardiology', 'medical'], level: 'emt',
+      revised: '2024-11-30',
+      content: `## BLS Chest Pain Protocol
+
+**Indications:** Suspected cardiac-origin chest pain — BLS level care.
+
+---
+
+::: emt
+### Assessment
+- OPQRST pain assessment
+- Vital signs including SpO2
+- 12-lead ECG if available
+- SAMPLE history — medications, allergies, last nitroglycerin
+
+### Interventions
+- Oxygen if SpO2 < 94% — titrate, avoid hyperoxia
+- **Aspirin 324 mg PO** chewable — confirm no allergy, active bleeding, recent GI bleed
+- Position of comfort — semi-Fowler preferred
+- Reassure patient; minimize exertion
+- Assist with patient's own prescribed nitroglycerin per protocol/medical direction
+
+### Transport
+- Rapid transport to appropriate facility
+- Notify receiving hospital of suspected ACS
+- Repeat vitals en route every 5 minutes
+
+> **DO NOT administer nitroglycerin if:** SBP < 90, HR < 50 or > 100, inferior STEMI with right heart involvement, or PDE-5 inhibitor use within 48 hours.
+:::
+`
+    },
+    {
+      id: 'p008', setId: 'set1', title: 'Airway Management',
+      tags: ['procedure', 'respiratory'], level: 'paramedic',
+      revised: '2025-02-14',
+      content: `## Advanced Airway Management
+
+**Purpose:** Definitive airway control for patients unable to protect or maintain their own airway.
+
+---
+
+::: emt
+### EMT — Basic Airway
+- Head-tilt chin-lift (jaw thrust if C-spine concern)
+- OPA / NPA sizing and insertion
+- BVM ventilation: 1 breath every 5-6 seconds; visible chest rise
+- Suction — limit to 10 seconds per attempt
+:::
+
+::: aemt
+### AEMT — Supraglottic Airways (iGel, King LT, LMA)
+**Indications:** Cardiac arrest, unconscious without gag reflex, failed BVM ventilation
+
+**Procedure:**
+1. Select appropriate size by weight/height chart
+2. Insert per device-specific instructions; inflate cuff if applicable
+3. Confirm: chest rise bilaterally, SpO2, waveform capnography
+4. Secure device; document placement time and confirmation method
+:::
+
+::: paramedic
+### Paramedic — Endotracheal Intubation
+**Pre-oxygenate** with BVM x3 minutes (8 deep breaths if patient is conscious)
+
+**Procedure:**
+1. Sniffing position; ramped position for obese patients
+2. Laryngoscope in left hand — visualise cords
+3. Pass 7.0-8.0 mm ETT through cords under direct vision
+4. Inflate cuff to seal; attach waveform ETCO2
+5. Confirm: chest rise bilateral, 5-point auscultation, continuous ETCO2 waveform
+
+### Rapid Sequence Intubation (RSI)
+| Step | Drug | Dose |
+|------|------|------|
+| Pretreatment (TBI) | Lidocaine | 1.5 mg/kg IV |
+| Sedation | Ketamine | 1-2 mg/kg IV |
+| Paralytic (preferred) | Succinylcholine | 1.5 mg/kg IV |
+| Paralytic (alt) | Rocuronium | 1.2 mg/kg IV |
+
+### Confirmation Algorithm
+- **Primary:** Direct visualization of tube passing through cords
+- **Secondary:** Waveform ETCO2 >= 35-45 mmHg x6 waveforms
+- **Tertiary:** CXR at hospital
+
+> **Failed Airway:** BVM ventilation → Supraglottic airway → Surgical cricothyrotomy
+:::
+`
+    }
+  ];
+}
+
+// ══════════════════════════════════════════════════
+// INITIALIZATION
+// ══════════════════════════════════════════════════
+async function init() {
+  applyTheme();
+  await loadState();
+  renderSetSelector();
+  renderTagNav();
+  renderLevelNav();
+  renderHome();
+  renderCalcs();
+  await refreshOnLaunch();
+}
+
+async function refreshOnLaunch() {
+  if (serverMode) {
+    try {
+      const r = await apiPost('/refresh', {});
+      state.lastRefresh = r.lastRefresh;
+    } catch(e) {
+      state.lastRefresh = new Date().toISOString();
+    }
+  } else {
+    state.lastRefresh = new Date().toISOString();
+    saveLocalState();
+  }
+  updateLastRefresh();
+}
+
+function updateLastRefresh() {
+  const el = document.getElementById('last-refresh');
+  if (el && state.lastRefresh) {
+    const d = new Date(state.lastRefresh);
+    el.textContent = d.toLocaleString();
+  }
+}
+
+// ══════════════════════════════════════════════════
+// THEME
+// ══════════════════════════════════════════════════
+function applyTheme() {
+  document.body.classList.toggle('light-mode', !state.darkMode);
+  const btn = document.querySelector('.icon-btn[title="Toggle Day/Night"]');
+  if (btn) btn.textContent = state.darkMode ? '🌙' : '☀️';
+}
+
+function toggleTheme() {
+  state.darkMode = !state.darkMode;
+  applyTheme();
+  saveState();
+}
+
+// ══════════════════════════════════════════════════
+// SIDEBAR
+// ══════════════════════════════════════════════════
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+function renderSetSelector() {
+  const sel = document.getElementById('protocol-set-select');
+  sel.innerHTML = state.sets.map(s =>
+    `<option value="${s.id}" ${s.id === state.activeSet ? 'selected' : ''}>${s.name}</option>`
+  ).join('');
+}
+
+function changeProtocolSet(id) {
+  state.activeSet = id;
+  activeLevelFilter = null;
+  activeTagFilter = null;
+  saveState();
+  renderHome();
+  renderTagNav();
+  showPage('home');
+}
+
+function renderTagNav() {
+  const container = document.getElementById('tag-nav');
+  const counts = {};
+  state.protocols.filter(p => p.setId === state.activeSet).forEach(p => {
+    (p.tags || []).forEach(t => { counts[t] = (counts[t] || 0) + 1; });
+  });
+  container.innerHTML = state.tags.map(t => `
+    <button class="nav-item ${activeTagFilter === t.id ? 'active' : ''}" onclick="filterByTag('${t.id}')">
+      <span class="tag-dot" style="background:${t.color}"></span>
+      ${t.name}
+      <span class="count">${counts[t.id] || 0}</span>
+    </button>
+  `).join('');
+}
+
+function renderLevelNav() {
+  const container = document.getElementById('level-filter-nav');
+  container.innerHTML = state.levels.map(l => `
+    <button class="nav-item ${activeLevelFilter === l.id ? 'active' : ''}" onclick="filterByLevel('${l.id}')">
+      <span class="tag-dot" style="background:${l.color}"></span>
+      ${l.name}
+    </button>
+  `).join('');
+}
+
+function filterByTag(tagId) {
+  activeTagFilter = activeTagFilter === tagId ? null : tagId;
+  activeLevelFilter = null;
+  renderTagNav();
+  renderLevelNav();
+  renderHome();
+  showPage('home');
+}
+
+function filterByLevel(levelId) {
+  activeLevelFilter = activeLevelFilter === levelId ? null : levelId;
+  activeTagFilter = null;
+  renderLevelNav();
+  renderTagNav();
+  renderHome();
+  showPage('home');
+}
+
+// ══════════════════════════════════════════════════
+// HOME
+// ══════════════════════════════════════════════════
+function renderHome() {
+  const setInfo = state.sets.find(s => s.id === state.activeSet);
+  document.getElementById('home-title').textContent = setInfo ? setInfo.name : 'EMS Protocols';
+
+  let protos = state.protocols.filter(p => p.setId === state.activeSet);
+  if (activeTagFilter) protos = protos.filter(p => (p.tags || []).includes(activeTagFilter));
+  if (activeLevelFilter) protos = protos.filter(p => p.level === activeLevelFilter);
+
+  document.getElementById('protocol-count').textContent = protos.length;
+  updateLastRefresh();
+
+  const container = document.getElementById('home-sections');
+  if (!protos.length) {
+    container.innerHTML = '<div class="no-results" style="padding:40px;text-align:center;color:var(--text3);">No protocols found. Add protocols in Admin settings.</div>';
+    return;
+  }
+
+  // Group by first tag
+  const grouped = {};
+  protos.forEach(p => {
+    const tagId = (p.tags && p.tags[0]) || 'other';
+    if (!grouped[tagId]) grouped[tagId] = [];
+    grouped[tagId].push(p);
+  });
+
+  container.innerHTML = Object.entries(grouped).map(([tagId, protocols]) => {
+    const tag = state.tags.find(t => t.id === tagId) || { name: 'Other', color: '#9e9e9e' };
+    const cards = protocols.map(p => renderProtocolCard(p)).join('');
+    return `
+      <div class="section-title">
+        <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${tag.color};"></span>
+        ${tag.name}
+      </div>
+      <div class="protocol-grid">${cards}</div>
+    `;
+  }).join('');
+
+  // Attach bookmark star handlers
+  document.querySelectorAll('.bookmark-star').forEach(star => {
+    star.addEventListener('click', e => {
+      e.stopPropagation();
+      toggleBookmark(star.dataset.id);
+      star.classList.toggle('active', state.bookmarks.includes(star.dataset.id));
+    });
+  });
+}
+
+function renderProtocolCard(p) {
+  const level = state.levels.find(l => l.id === p.level);
+  const levelBadge = level ? `<span class="level-badge" style="background:${level.color}22;color:${level.color};border:1px solid ${level.color}44;">${level.name}</span>` : '';
+  const tagBadges = (p.tags || []).map(tId => {
+    const t = state.tags.find(t => t.id === tId);
+    return t ? `<span class="tag-badge" style="border-color:${t.color}44;color:${t.color};">${t.name}</span>` : '';
+  }).join('');
+  const isBookmarked = state.bookmarks.includes(p.id);
+  const level0 = state.levels.find(l => l.id === p.level);
+  const borderColor = level0 ? level0.color : 'var(--border)';
+  return `
+    <div class="protocol-card" onclick="openProtocol('${p.id}')" style="border-left-color:${borderColor};">
+      <div class="card-title">${p.title}</div>
+      <div class="card-meta">${levelBadge}${tagBadges}</div>
+      <span class="bookmark-star ${isBookmarked ? 'active' : ''}" data-id="${p.id}">★</span>
+    </div>
+  `;
+}
+
+// ══════════════════════════════════════════════════
+// PROTOCOL DETAIL
+// ══════════════════════════════════════════════════
+function openProtocol(id) {
+  const p = state.protocols.find(pr => pr.id === id);
+  if (!p) return;
+  document.getElementById('detail-title').textContent = p.title;
+
+  const level = state.levels.find(l => l.id === p.level);
+  const levelBadge = level ? `<span class="level-badge" style="background:${level.color}22;color:${level.color};border:1px solid ${level.color}44;">${level.name}</span>` : '';
+  const tagBadges = (p.tags || []).map(tId => {
+    const t = state.tags.find(t => t.id === tId);
+    return t ? `<span class="tag-badge" style="border-color:${t.color}44;color:${t.color};">${t.name}</span>` : '';
+  }).join('');
+  const revised = p.revised ? `<span style="color:var(--text3);font-size:0.8rem;">Revised: ${p.revised}</span>` : '';
+  document.getElementById('detail-meta').innerHTML = levelBadge + tagBadges + revised;
+
+  const bodyEl = document.getElementById('detail-body');
+  bodyEl.innerHTML = renderProtocolContent(p.content || '');
+
+  // Wire up internal protocol links
+  bodyEl.querySelectorAll('a[data-protocol]').forEach(a => {
+    a.addEventListener('click', e => { e.preventDefault(); openProtocol(a.dataset.protocol); });
+  });
+
+  showPage('protocol');
+}
+
+// ── Core renderer: splits on ::: fences, renders each chunk, assembles HTML ──
+//
+// Strategy: parse the markdown line-by-line into an ordered list of "chunks":
+//   { type: 'plain', text: '...' }
+//   { type: 'skill', levelId: 'emt', text: '...' }
+//
+// Each chunk's text is passed to marked.parse() independently so marked never
+// sees a fence marker and cannot corrupt the structure.
+// The results are then wrapped in the appropriate HTML containers.
+
+function renderProtocolContent(md) {
+  const levelIds = state.levels.map(l => l.id.toLowerCase());
+  const lines = md.split('\n');
+  const chunks = [];
+  let currentType = 'plain';
+  let currentLevel = null;
+  let buffer = [];
+
+  function flush() {
+    if (buffer.length) {
+      chunks.push({ type: currentType, levelId: currentLevel, text: buffer.join('\n') });
+    }
+    buffer = [];
+  }
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    const openMatch = trimmed.match(/^:::\s*([a-zA-Z0-9_-]+)\s*$/);
+    const isClose = trimmed === ':::';
+
+    if (currentType === 'plain' && openMatch) {
+      const lid = openMatch[1].toLowerCase();
+      if (levelIds.includes(lid)) {
+        flush();
+        currentType = 'skill';
+        currentLevel = lid;
+        continue;
+      }
+    }
+
+    if (currentType === 'skill' && isClose) {
+      flush();
+      currentType = 'plain';
+      currentLevel = null;
+      continue;
+    }
+
+    buffer.push(line);
+  }
+  flush(); // flush any trailing content
+
+  // ── Build legend from skill chunks present ──
+  const usedLevels = [];
+  const seen = new Set();
+  for (const chunk of chunks) {
+    if (chunk.type === 'skill' && !seen.has(chunk.levelId)) {
+      seen.add(chunk.levelId);
+      usedLevels.push(chunk.levelId);
+    }
+  }
+
+  let html = '';
+
+  // Legend strip
+  if (usedLevels.length) {
+    const items = usedLevels.map(lid => {
+      const lvl = state.levels.find(l => l.id.toLowerCase() === lid) || { name: lid, color: '#888' };
+      return `<span class="skill-legend-item"><span class="skill-legend-dot" style="background:${lvl.color};"></span>${lvl.name}</span>`;
+    }).join('');
+    html += `<div class="skill-legend"><strong style="margin-right:6px;color:var(--text2);">Skill Levels:</strong>${items}</div>`;
+  }
+
+  // Render chunks
+  for (const chunk of chunks) {
+    const renderedMd = fixProtocolLinks(marked.parse(chunk.text));
+    if (chunk.type === 'plain') {
+      html += renderedMd;
+    } else {
+      const lvl = state.levels.find(l => l.id.toLowerCase() === chunk.levelId) || { name: chunk.levelId.toUpperCase(), color: '#888888' };
+      html += `
+        <div class="skill-section" style="border-left-color:${lvl.color};">
+          <div class="skill-section-header" style="background:${lvl.color};">
+            <span class="skill-icon">🏥</span>${lvl.name} Scope
+          </div>
+          <div class="skill-section-body">${renderedMd}</div>
+        </div>`;
+    }
+  }
+
+  return html;
+}
+
+// Convert protocol: hrefs to data attributes so we can wire click handlers
+function fixProtocolLinks(html) {
+  return html.replace(/href="protocol:([^"]+)"/g, 'href="#" data-protocol="$1"');
+}
+
+function goBack() {
+  pageHistory.pop();
+  const prev = pageHistory[pageHistory.length - 1] || 'home';
+  pageHistory.pop();
+  showPage(prev);
+}
+
+// ══════════════════════════════════════════════════
+// PAGES
+// ══════════════════════════════════════════════════
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById('page-' + page);
+  if (el) el.classList.add('active');
+  currentPage = page;
+  pageHistory.push(page);
+  if (pageHistory.length > 20) pageHistory.shift();
+
+  // Update nav active states
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const navMap = { home: 'nav-home', search: 'nav-search', calculators: 'nav-calculators', bookmarks: 'nav-bookmarks' };
+  if (navMap[page]) document.getElementById(navMap[page])?.classList.add('active');
+
+  if (page === 'bookmarks') renderBookmarks();
+  if (page === 'admin') renderAdminPage();
+  if (page === 'search' && document.getElementById('search-bar').value) {
+    handleSearch(document.getElementById('search-bar').value);
+  }
+
+  // Close sidebar on mobile
+  if (window.innerWidth < 769) document.getElementById('sidebar').classList.remove('open');
+}
+
+// ══════════════════════════════════════════════════
+// SEARCH
+// ══════════════════════════════════════════════════
+function handleSearch(query) {
+  if (query.trim()) showPage('search');
+  const list = document.getElementById('search-results-list');
+  if (!query.trim()) {
+    list.innerHTML = '<div class="no-results">Start typing to search protocols…</div>';
+    return;
+  }
+  const q = query.toLowerCase();
+  const results = state.protocols.filter(p =>
+    p.title.toLowerCase().includes(q) ||
+    (p.content || '').toLowerCase().includes(q) ||
+    (p.tags || []).some(t => t.includes(q))
+  );
+  if (!results.length) {
+    list.innerHTML = '<div class="no-results">No protocols found for "' + query + '"</div>';
+    return;
+  }
+  list.innerHTML = results.map(p => {
+    const snippet = getSnippet(p.content || '', q);
+    const level = state.levels.find(l => l.id === p.level);
+    return `
+      <div class="search-item" onclick="openProtocol('${p.id}')">
+        <h4>${highlight(p.title, q)}</h4>
+        ${level ? `<span class="level-badge" style="background:${level.color}22;color:${level.color};font-size:0.7rem;padding:1px 6px;border-radius:4px;">${level.name}</span>` : ''}
+        <p style="margin-top:6px;">${snippet}</p>
+      </div>
+    `;
+  }).join('');
+}
+
+function getSnippet(text, query) {
+  const plain = text.replace(/[#*`>|\-\[\]]/g, ' ').replace(/\s+/g, ' ');
+  const idx = plain.toLowerCase().indexOf(query);
+  if (idx < 0) return plain.slice(0, 120) + '…';
+  const start = Math.max(0, idx - 40);
+  const end = Math.min(plain.length, idx + 80);
+  return (start > 0 ? '…' : '') + highlight(plain.slice(start, end), query) + (end < plain.length ? '…' : '');
+}
+
+function highlight(text, query) {
+  if (!query) return text;
+  const re = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+  return text.replace(re, '<span class="search-highlight">$1</span>');
+}
+
+// ══════════════════════════════════════════════════
+// BOOKMARKS
+// ══════════════════════════════════════════════════
+function toggleBookmark(id) {
+  const idx = state.bookmarks.indexOf(id);
+  if (idx >= 0) { state.bookmarks.splice(idx, 1); toast('Bookmark removed'); }
+  else { state.bookmarks.push(id); toast('Protocol bookmarked ⭐'); }
+  saveState();
+}
+
+function renderBookmarks() {
+  const list = document.getElementById('bookmarks-list');
+  const protos = state.protocols.filter(p => state.bookmarks.includes(p.id));
+  if (!protos.length) {
+    list.innerHTML = '<div class="no-results" style="grid-column:1/-1;padding:40px;text-align:center;color:var(--text3);">No bookmarks yet. Star a protocol to save it here.</div>';
+    return;
+  }
+  list.innerHTML = protos.map(p => renderProtocolCard(p)).join('');
+  list.querySelectorAll('.bookmark-star').forEach(star => {
+    star.addEventListener('click', e => {
+      e.stopPropagation();
+      toggleBookmark(star.dataset.id);
+      renderBookmarks();
+    });
+  });
+}
+
+// ══════════════════════════════════════════════════
+// CALCULATORS
+// ══════════════════════════════════════════════════
+const CALCULATORS = [
+  {
+    id: 'glasgow', name: 'Glasgow Coma Scale (GCS)', desc: 'Eye, verbal, motor response scoring',
+    fields: [
+      { id: 'eye', label: 'Eye Opening', type: 'select', options: [['4','Spontaneous (4)'],['3','To voice (3)'],['2','To pain (2)'],['1','None (1)']] },
+      { id: 'verbal', label: 'Verbal Response', type: 'select', options: [['5','Oriented (5)'],['4','Confused (4)'],['3','Inappropriate words (3)'],['2','Sounds (2)'],['1','None (1)']] },
+      { id: 'motor', label: 'Motor Response', type: 'select', options: [['6','Obeys commands (6)'],['5','Localizes pain (5)'],['4','Withdraws (4)'],['3','Flexion (3)'],['2','Extension (2)'],['1','None (1)']] }
+    ],
+    calc(f) {
+      const score = +f.eye + +f.verbal + +f.motor;
+      const sev = score <= 8 ? 'Severe TBI' : score <= 12 ? 'Moderate TBI' : 'Mild / Normal';
+      return { value: score + '/15', label: sev, notes: score <= 8 ? '⚠️ Consider advanced airway' : '' };
+    }
+  },
+  {
+    id: 'parkland', name: 'Parkland Burn Formula', desc: 'IV fluid resuscitation for burn patients',
+    fields: [
+      { id: 'weight', label: 'Weight (kg)', type: 'number', placeholder: '70' },
+      { id: 'tbsa', label: 'TBSA Burned (%)', type: 'number', placeholder: '20' }
+    ],
+    calc(f) {
+      const total = 4 * +f.weight * +f.tbsa;
+      const first8 = total / 2;
+      const rate8h = (first8 / 8).toFixed(0);
+      return { value: total.toFixed(0) + ' mL', label: `Total in 24h (LR). First 8h: ${first8.toFixed(0)}mL @ ~${rate8h}mL/hr`, notes: 'Start from time of burn, not time of presentation.' };
+    }
+  },
+  {
+    id: 'apgar', name: 'APGAR Score', desc: 'Neonatal assessment at 1 and 5 minutes',
+    fields: [
+      { id: 'appearance', label: 'Appearance', type: 'select', options: [['0','Blue/pale all over (0)'],['1','Blue extremities, pink body (1)'],['2','Pink all over (2)']] },
+      { id: 'pulse', label: 'Pulse', type: 'select', options: [['0','Absent (0)'],['1','< 100 bpm (1)'],['2','≥ 100 bpm (2)']] },
+      { id: 'grimace', label: 'Grimace/Reflex', type: 'select', options: [['0','None (0)'],['1','Grimace (1)'],['2','Cry/cough/sneeze (2)']] },
+      { id: 'activity', label: 'Activity/Muscle Tone', type: 'select', options: [['0','Limp (0)'],['1','Some flexion (1)'],['2','Active motion (2)']] },
+      { id: 'respiration', label: 'Respiration', type: 'select', options: [['0','Absent (0)'],['1','Weak/irregular (1)'],['2','Strong cry (2)']] }
+    ],
+    calc(f) {
+      const s = +f.appearance + +f.pulse + +f.grimace + +f.activity + +f.respiration;
+      const interp = s >= 7 ? 'Normal — routine care' : s >= 4 ? 'Moderate concern — stimulate, O₂' : 'Critical — immediate resuscitation';
+      return { value: s + '/10', label: interp };
+    }
+  },
+  {
+    id: 'bmi', name: 'Pediatric Weight Estimate', desc: 'Broselow-based weight by age',
+    fields: [
+      { id: 'age', label: 'Age (years)', type: 'number', placeholder: '4' },
+      { id: 'method', label: 'Formula', type: 'select', options: [['broselow','Broselow (Age-based)'],['handband','Handband (2 × age + 8)']] }
+    ],
+    calc(f) {
+      const age = +f.age;
+      let weight;
+      if (f.method === 'handband') { weight = 2 * age + 8; }
+      else { weight = age < 1 ? 4 : age < 5 ? (2 * age + 8) : age < 10 ? (3 * age + 7) : (2.5 * age + 8); }
+      return { value: weight.toFixed(1) + ' kg', label: 'Estimated weight — use actual when possible' };
+    }
+  },
+  {
+    id: 'etco2', name: 'ETCO₂ Interpretation', desc: 'End-tidal CO₂ clinical interpretation guide',
+    fields: [
+      { id: 'etco2val', label: 'ETCO₂ Value (mmHg)', type: 'number', placeholder: '38' },
+      { id: 'context', label: 'Clinical Context', type: 'select', options: [['normal','Normal ventilation'],['cpr','CPR / Cardiac Arrest'],['intubated','Post-intubation'],['trend','Trending/change']] }
+    ],
+    calc(f) {
+      const v = +f.etco2val;
+      let label = '', notes = '';
+      if (f.context === 'cpr') {
+        if (v < 10) { label = 'Poor CPR quality / likely non-survivable'; notes = 'Improve compression quality; consider termination if persistent'; }
+        else if (v < 20) { label = 'Fair — improve CPR quality'; notes = 'Check rate, depth, recoil'; }
+        else { label = 'Good CPR quality'; notes = 'ROSC possible if sustained above 20'; }
+      } else {
+        if (v < 25) { label = 'Hyperventilation / low perfusion'; notes = 'Reduce rate; rule out PE, shock'; }
+        else if (v <= 45) { label = 'Normal range ✓'; notes = ''; }
+        else { label = 'Hypoventilation / hypercapnia'; notes = 'Increase rate/volume; assess for COPD, sedation'; }
+      }
+      return { value: v + ' mmHg', label, notes };
+    }
+  },
+  {
+    id: 'drip', name: 'IV Drip Rate Calculator', desc: 'Calculate drops per minute for IV infusions',
+    fields: [
+      { id: 'volume', label: 'Volume to Infuse (mL)', type: 'number', placeholder: '250' },
+      { id: 'time', label: 'Infusion Time (minutes)', type: 'number', placeholder: '60' },
+      { id: 'drop_factor', label: 'Drop Factor (gtts/mL)', type: 'select', options: [['10','Macro-drip 10'],['15','Macro-drip 15'],['20','Macro-drip 20'],['60','Micro-drip 60']] }
+    ],
+    calc(f) {
+      const rate = (+f.volume / +f.time) * +f.drop_factor;
+      const mlhr = (+f.volume / +f.time) * 60;
+      return { value: rate.toFixed(0) + ' gtts/min', label: `${mlhr.toFixed(0)} mL/hr` };
+    }
+  },
+  {
+    id: 'stroke', name: 'Cincinnati Stroke Scale', desc: 'Prehospital stroke identification',
+    fields: [
+      { id: 'facial', label: 'Facial Droop', type: 'select', options: [['0','Normal — equal movement (0)'],['1','Abnormal — unequal movement (1)']] },
+      { id: 'arm', label: 'Arm Drift', type: 'select', options: [['0','Normal — both hold equally (0)'],['1','Abnormal — one arm drifts/falls (1)']] },
+      { id: 'speech', label: 'Speech', type: 'select', options: [['0','Normal — clear, appropriate (0)'],['1','Abnormal — slurred/wrong words/none (1)']] }
+    ],
+    calc(f) {
+      const s = +f.facial + +f.arm + +f.speech;
+      const result = s > 0 ? `⚠️ Positive Stroke Screen (${s}/3) — Activate Stroke Alert` : 'Negative Cincinnati Screen';
+      return { value: s + '/3', label: result, notes: s > 0 ? '72% sensitivity for acute stroke with ≥1 abnormal finding' : '' };
+    }
+  },
+  {
+    id: 'shock_index', name: 'Shock Index', desc: 'HR ÷ SBP — early shock detection',
+    fields: [
+      { id: 'hr', label: 'Heart Rate (bpm)', type: 'number', placeholder: '110' },
+      { id: 'sbp', label: 'Systolic BP (mmHg)', type: 'number', placeholder: '90' }
+    ],
+    calc(f) {
+      const si = +f.hr / +f.sbp;
+      let label;
+      if (si < 0.6) label = 'Normal';
+      else if (si < 1.0) label = 'Mild shock / monitor closely';
+      else if (si < 1.4) label = 'Moderate shock — aggressive resuscitation';
+      else label = 'Severe shock — immediate intervention';
+      return { value: si.toFixed(2), label, notes: 'Normal: 0.5-0.7. Values > 1.0 correlate with increased mortality.' };
+    }
+  }
+];
+
+function renderCalcs() {
+  document.getElementById('calc-grid').innerHTML = CALCULATORS.map(c => `
+    <div class="calc-card" onclick="openCalc('${c.id}')">
+      <h3>${c.name}</h3>
+      <p>${c.desc}</p>
+    </div>
+  `).join('');
+}
+
+function openCalc(id) {
+  currentCalc = CALCULATORS.find(c => c.id === id);
+  if (!currentCalc) return;
+  document.getElementById('calc-title').textContent = currentCalc.name;
+  document.getElementById('calc-result').style.display = 'none';
+  document.getElementById('calc-fields').innerHTML = currentCalc.fields.map(f => `
+    <div class="form-group">
+      <label>${f.label}</label>
+      ${f.type === 'select'
+        ? `<select class="input-field" id="cf_${f.id}">${f.options.map(o => `<option value="${o[0]}">${o[1]}</option>`).join('')}</select>`
+        : `<input type="number" class="input-field" id="cf_${f.id}" placeholder="${f.placeholder || ''}">`}
+    </div>
+  `).join('');
+  document.getElementById('calc-modal').classList.add('open');
+}
+
+function runCalc() {
+  if (!currentCalc) return;
+  const fieldVals = {};
+  currentCalc.fields.forEach(f => {
+    fieldVals[f.id] = document.getElementById('cf_' + f.id).value;
+  });
+  const result = currentCalc.calc(fieldVals);
+  const el = document.getElementById('calc-result');
+  el.style.display = 'block';
+  el.innerHTML = `
+    <div class="result-value">${result.value}</div>
+    <div class="result-label">${result.label}</div>
+    ${result.notes ? `<div style="margin-top:8px;font-size:0.8rem;color:var(--text3);">${result.notes}</div>` : ''}
+  `;
+}
+
+function closeCalc() {
+  document.getElementById('calc-modal').classList.remove('open');
+  currentCalc = null;
+}
+
+// ══════════════════════════════════════════════════
+// ADMIN
+// ══════════════════════════════════════════════════
+function openAdminLogin() {
+  document.getElementById('admin-password-input').value = '';
+  document.getElementById('login-error').style.display = 'none';
+  document.getElementById('login-modal').classList.add('open');
+}
+
+function closeAdminLogin() {
+  document.getElementById('login-modal').classList.remove('open');
+}
+
+async function checkAdminLogin() {
+  const pw = document.getElementById('admin-password-input').value;
+  document.getElementById('login-error').style.display = 'none';
+
+  if (serverMode) {
+    try {
+      const r = await apiPost('/auth', { password: pw });
+      adminToken = r.token;
+      closeAdminLogin();
+      showPage('admin');
+    } catch(e) {
+      document.getElementById('login-error').style.display = 'block';
+    }
+  } else {
+    // Standalone mode — compare against local password
+    if (pw === state.adminPassword) {
+      adminToken = 'local';
+      closeAdminLogin();
+      showPage('admin');
+    } else {
+      document.getElementById('login-error').style.display = 'block';
+    }
+  }
+}
+
+function renderAdminPage() {
+  // Sets
+  const setList = document.getElementById('set-list');
+  setList.innerHTML = state.sets.map(s => `
+    <div class="level-item">
+      <div class="level-name">${s.name}</div>
+      ${s.url ? `<span style="font-size:0.78rem;color:var(--text3);">${s.url}</span>` : ''}
+      <button class="tag-remove" onclick="removeSet('${s.id}')">✕</button>
+    </div>
+  `).join('');
+
+  // Tags
+  document.getElementById('admin-tag-list').innerHTML = state.tags.map(t => `
+    <div class="tag-item">
+      <span class="color-dot" style="background:${t.color};"></span>
+      ${t.name}
+      <button class="tag-remove" onclick="removeTag('${t.id}')">✕</button>
+    </div>
+  `).join('');
+
+  // Levels
+  document.getElementById('admin-levels-list').innerHTML = state.levels.map(l => `
+    <div class="level-item">
+      <span class="level-color-box" style="background:${l.color};" title="Color"></span>
+      <span class="level-name">${l.name}</span>
+      <button class="tag-remove" onclick="removeLevel('${l.id}')">✕</button>
+    </div>
+  `).join('');
+
+  // Protocol list
+  const pl = document.getElementById('admin-protocol-list');
+  pl.innerHTML = state.protocols.map(p => `
+    <div class="admin-protocol-item" onclick="openProtocolEditor('${p.id}')">
+      <span style="flex:1;">${p.title}</span>
+      <span style="font-size:0.75rem;color:var(--text3);">${state.sets.find(s=>s.id===p.setId)?.name || ''}</span>
+    </div>
+  `).join('');
+
+  // Update set selector in editor
+  const editSetSel = document.getElementById('edit-prot-set');
+  editSetSel.innerHTML = state.sets.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+
+  // Level selector
+  const editLvl = document.getElementById('edit-prot-level');
+  editLvl.innerHTML = state.levels.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
+}
+
+async function addProtocolSet() {
+  const name = document.getElementById('new-set-name').value.trim();
+  const url  = document.getElementById('new-set-url').value.trim();
+  if (!name) return;
+  const s = { id: 'set_' + Date.now(), name, url };
+  if (serverMode) {
+    try { await apiPost('/sets', s); } catch(e) { toast('Error: ' + e.message); return; }
+    const sets = await apiGet('/sets');
+    state.sets = sets;
+  } else {
+    state.sets.push(s);
+    saveLocalState();
+  }
+  document.getElementById('new-set-name').value = '';
+  document.getElementById('new-set-url').value  = '';
+  renderSetSelector();
+  renderAdminPage();
+  toast('Protocol set added');
+}
+
+async function removeSet(id) {
+  if (state.sets.length <= 1) { toast('Cannot remove last set'); return; }
+  if (serverMode) {
+    try { await apiDelete('/sets/' + id); } catch(e) { toast('Error: ' + e.message); return; }
+    const sets = await apiGet('/sets');
+    state.sets = sets;
+  } else {
+    state.sets = state.sets.filter(s => s.id !== id);
+    saveLocalState();
+  }
+  if (state.activeSet === id) state.activeSet = state.sets[0].id;
+  renderSetSelector();
+  renderAdminPage();
+}
+
+async function addTag() {
+  const name  = document.getElementById('new-tag-name').value.trim();
+  const color = document.getElementById('new-tag-color').value;
+  if (!name) return;
+  const id = name.toLowerCase().replace(/\s+/g, '_');
+  const t  = { id, name, color };
+  if (serverMode) {
+    try { await apiPost('/tags', t); } catch(e) { toast('Error: ' + e.message); return; }
+    state.tags = await apiGet('/tags');
+  } else {
+    state.tags.push(t);
+    saveLocalState();
+  }
+  document.getElementById('new-tag-name').value = '';
+  renderTagNav();
+  renderAdminPage();
+  toast('Tag added');
+}
+
+async function removeTag(id) {
+  if (serverMode) {
+    try { await apiDelete('/tags/' + id); } catch(e) { toast('Error: ' + e.message); return; }
+    state.tags = await apiGet('/tags');
+  } else {
+    state.tags = state.tags.filter(t => t.id !== id);
+    saveLocalState();
+  }
+  renderTagNav();
+  renderAdminPage();
+}
+
+async function addLevel() {
+  const name  = document.getElementById('new-level-name').value.trim();
+  const color = document.getElementById('new-level-color').value;
+  if (!name) return;
+  const id = name.toLowerCase().replace(/\s+/g, '_');
+  const l  = { id, name, color };
+  if (serverMode) {
+    try { await apiPost('/levels', l); } catch(e) { toast('Error: ' + e.message); return; }
+    state.levels = await apiGet('/levels');
+  } else {
+    state.levels.push(l);
+    saveLocalState();
+  }
+  document.getElementById('new-level-name').value = '';
+  renderLevelNav();
+  renderAdminPage();
+  toast('Skill level added');
+}
+
+async function removeLevel(id) {
+  if (serverMode) {
+    try { await apiDelete('/levels/' + id); } catch(e) { toast('Error: ' + e.message); return; }
+    state.levels = await apiGet('/levels');
+  } else {
+    state.levels = state.levels.filter(l => l.id !== id);
+    saveLocalState();
+  }
+  renderLevelNav();
+  renderAdminPage();
+}
+
+async function changePassword() {
+  const pw = document.getElementById('new-password').value;
+  if (!pw) return;
+  if (serverMode) {
+    try { await apiPut('/settings', { newPassword: pw }); }
+    catch(e) { toast('Error: ' + e.message); return; }
+  } else {
+    state.adminPassword = pw;
+    saveLocalState();
+  }
+  document.getElementById('new-password').value = '';
+  toast('Password updated ✓');
+}
+
+// ══════════════════════════════════════════════════
+// PROTOCOL EDITOR
+// ══════════════════════════════════════════════════
+function openProtocolEditor(id) {
+  editingProtocolId = id;
+  const modal = document.getElementById('editor-modal');
+  const editSetSel = document.getElementById('edit-prot-set');
+  editSetSel.innerHTML = state.sets.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+  const editLvl = document.getElementById('edit-prot-level');
+  editLvl.innerHTML = state.levels.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
+
+  if (id) {
+    const p = state.protocols.find(pr => pr.id === id);
+    if (p) {
+      document.getElementById('editor-title').textContent = 'Edit Protocol';
+      document.getElementById('edit-prot-title').value = p.title;
+      editSetSel.value = p.setId;
+      document.getElementById('edit-prot-tags').value = (p.tags || []).join(', ');
+      editLvl.value = p.level;
+      document.getElementById('edit-prot-revised').value = p.revised || '';
+      document.getElementById('edit-prot-content').value = p.content || '';
+    }
+  } else {
+    document.getElementById('editor-title').textContent = 'New Protocol';
+    document.getElementById('edit-prot-title').value = '';
+    document.getElementById('edit-prot-tags').value = '';
+    document.getElementById('edit-prot-revised').value = new Date().toISOString().split('T')[0];
+    document.getElementById('edit-prot-content').value = '';
+    editSetSel.value = state.activeSet || (state.sets[0]?.id);
+  }
+  switchEditorTab('write');
+  modal.classList.add('open');
+}
+
+function switchEditorTab(tab) {
+  document.querySelectorAll('#editor-modal .tab').forEach((t, i) => {
+    t.classList.toggle('active', (i === 0 && tab === 'write') || (i === 1 && tab === 'preview'));
+  });
+  const ta = document.getElementById('edit-prot-content');
+  const prev = document.getElementById('editor-preview');
+  if (tab === 'write') { ta.style.display = ''; prev.style.display = 'none'; }
+  else {
+    ta.style.display = 'none'; prev.style.display = '';
+    prev.innerHTML = renderProtocolContent(ta.value || '');
+    prev.querySelectorAll('a[data-protocol]').forEach(a => {
+      a.addEventListener('click', e => { e.preventDefault(); });
+    });
+  }
+}
+
+async function saveProtocol() {
+  const title   = document.getElementById('edit-prot-title').value.trim();
+  if (!title) { toast('Title is required'); return; }
+  const setId   = document.getElementById('edit-prot-set').value;
+  const tags    = document.getElementById('edit-prot-tags').value.split(',').map(t => t.trim()).filter(Boolean);
+  const level   = document.getElementById('edit-prot-level').value;
+  const revised = document.getElementById('edit-prot-revised').value;
+  const content = document.getElementById('edit-prot-content').value;
+  const proto   = { title, setId, tags, level, revised, content };
+
+  if (serverMode) {
+    try {
+      if (editingProtocolId) {
+        const updated = await apiPut('/protocols/' + editingProtocolId, proto);
+        const idx = state.protocols.findIndex(p => p.id === editingProtocolId);
+        if (idx >= 0) state.protocols[idx] = updated; else state.protocols.push(updated);
+      } else {
+        const created = await apiPost('/protocols', proto);
+        state.protocols.push(created);
+      }
+    } catch(e) { toast('Save failed: ' + e.message); return; }
+  } else {
+    if (editingProtocolId) {
+      const idx = state.protocols.findIndex(p => p.id === editingProtocolId);
+      if (idx >= 0) state.protocols[idx] = { ...state.protocols[idx], ...proto };
+    } else {
+      state.protocols.push({ id: 'p_' + Date.now(), ...proto });
+    }
+    saveLocalState();
+  }
+  closeEditor();
+  renderHome();
+  renderTagNav();
+  renderAdminPage();
+  toast('Protocol saved ✓');
+}
+
+async function deleteProtocol() {
+  if (!editingProtocolId) return;
+  if (!confirm('Delete this protocol? This cannot be undone.')) return;
+  if (serverMode) {
+    try { await apiDelete('/protocols/' + editingProtocolId); }
+    catch(e) { toast('Delete failed: ' + e.message); return; }
+    state.protocols = state.protocols.filter(p => p.id !== editingProtocolId);
+  } else {
+    state.protocols = state.protocols.filter(p => p.id !== editingProtocolId);
+    saveLocalState();
+  }
+  state.bookmarks = state.bookmarks.filter(id => id !== editingProtocolId);
+  saveState();
+  closeEditor();
+  renderHome();
+  renderTagNav();
+  renderAdminPage();
+  toast('Protocol deleted');
+}
+
+function closeEditor() {
+  document.getElementById('editor-modal').classList.remove('open');
+  editingProtocolId = null;
+}
+
+// ══════════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════════
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+// ══════════════════════════════════════════════════
+// SERVICE WORKER (offline support)
+// ══════════════════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    // Inline service worker as blob
+    const swCode = `
+const CACHE = 'medcmd-v1';
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(['/'])));
+});
+self.addEventListener('fetch', e => {
+  e.respondWith(
+    caches.match(e.request).then(r => r || fetch(e.request).then(res => {
+      const clone = res.clone();
+      caches.open(CACHE).then(c => c.put(e.request, clone));
+      return res;
+    }))
+  );
+});
+    `;
+    try {
+      const blob = new Blob([swCode], { type: 'application/javascript' });
+      const url = URL.createObjectURL(blob);
+      navigator.serviceWorker.register(url);
+    } catch(e) {}
+  });
+}
+
+// ══════════════════════════════════════════════════
+// CLOSE MODALS ON BACKDROP CLICK
+// ══════════════════════════════════════════════════
+document.querySelectorAll('.calc-modal').forEach(m => {
+  m.addEventListener('click', e => {
+    if (e.target === m) {
+      if (m.id === 'calc-modal') closeCalc();
+      else if (m.id === 'editor-modal') closeEditor();
+      else if (m.id === 'login-modal') closeAdminLogin();
+    }
+  });
+});
+
+// ══════════════════════════════════════════════════
+// KEYBOARD SHORTCUT
+// ══════════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+    e.preventDefault();
+    document.getElementById('search-bar').focus();
+  }
+  if (e.key === 'Escape') {
+    closeCalc(); closeEditor(); closeAdminLogin();
+    document.getElementById('sidebar').classList.remove('open');
+  }
+});
+
+// ══════════════════════════════════════════════════
+// BOOT
+// ══════════════════════════════════════════════════
+init();
+</script>
+</body>
+</html>
