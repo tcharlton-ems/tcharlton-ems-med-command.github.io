@@ -118,6 +118,8 @@ function newId(prefix) {
   return prefix + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
 }
 
+const ADMIN_FILE = path.join(__dirname, 'admin.html');
+
 // ─────────────────────────────────────────────────
 // STATIC FILES
 // ─────────────────────────────────────────────────
@@ -126,6 +128,14 @@ app.get('/', (req, res) => {
     res.sendFile(HTML_FILE);
   } else {
     res.status(404).send('index.html not found. Please place the MedCommand HTML file as index.html in the same directory as server.js.');
+  }
+});
+
+app.get('/admin', (req, res) => {
+  if (fs.existsSync(ADMIN_FILE)) {
+    res.sendFile(ADMIN_FILE);
+  } else {
+    res.status(404).send('admin.html not found.');
   }
 });
 

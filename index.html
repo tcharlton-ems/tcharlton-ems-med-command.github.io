@@ -55,26 +55,47 @@
   /* ── Layout ── */
   #app { display: flex; flex-direction: column; min-height: 100vh; }
   #topbar {
-    display: flex; align-items: center; gap: 12px;
+    display: flex; align-items: center; gap: 10px;
     background: var(--bg2); border-bottom: 1px solid var(--border);
-    padding: 0 16px; height: 56px; position: sticky; top: 0; z-index: 100;
+    padding: 0 12px; height: 56px; position: sticky; top: 0; z-index: 100;
     box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    flex-wrap: nowrap;
   }
-  #topbar .logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 1.1rem; letter-spacing: 0.5px; }
+  #topbar .logo {
+    display: flex; align-items: center; gap: 6px;
+    font-weight: 700; font-size: 1.05rem; letter-spacing: 0.3px;
+    flex-shrink: 0; white-space: nowrap;
+  }
   #topbar .logo span { color: var(--accent); }
-  #topbar .logo .cross { font-size: 1.4rem; color: var(--red); }
-  #menu-btn { display: none; background: none; border: none; color: var(--text); font-size: 1.4rem; cursor: pointer; padding: 4px 8px; }
+  #topbar .logo .cross { font-size: 1.3rem; color: var(--red); }
+  #menu-btn {
+    display: none; background: none; border: none; color: var(--text);
+    font-size: 1.4rem; cursor: pointer; padding: 4px 6px; flex-shrink: 0;
+  }
   #search-bar {
-    flex: 1; max-width: 400px; margin: 0 auto;
+    flex: 1; min-width: 0;
     background: var(--bg3); border: 1px solid var(--border);
-    border-radius: 24px; padding: 6px 16px; color: var(--text);
+    border-radius: 24px; padding: 7px 14px; color: var(--text);
     font-size: 0.9rem; outline: none; transition: border-color 0.2s;
   }
   #search-bar:focus { border-color: var(--accent); }
   #search-bar::placeholder { color: var(--text3); }
-  .topbar-actions { display: flex; align-items: center; gap: 8px; margin-left: auto; }
-  .icon-btn { background: none; border: none; color: var(--text2); font-size: 1.2rem; cursor: pointer; padding: 6px; border-radius: 6px; transition: color 0.2s, background 0.2s; }
+  .topbar-actions {
+    display: flex; align-items: center; gap: 4px; flex-shrink: 0;
+  }
+  .icon-btn {
+    background: none; border: none; color: var(--text2); font-size: 1.2rem;
+    cursor: pointer; padding: 6px; border-radius: 6px;
+    transition: color 0.2s, background 0.2s; flex-shrink: 0;
+  }
   .icon-btn:hover { color: var(--text); background: var(--bg3); }
+
+  /* Server badge — full text on desktop, dot only on mobile */
+  #server-badge { font-size: 0.75rem; cursor: default; flex-shrink: 0; }
+  #server-badge .badge-dot {
+    display: none; width: 9px; height: 9px; border-radius: 50%;
+    background: var(--yellow);
+  }
 
   #main { display: flex; flex: 1; }
   #sidebar {
@@ -129,10 +150,10 @@
     display: inline-flex; align-items: center; gap: 5px;
     padding: 4px 12px; border-radius: 16px; font-size: 0.78rem; font-weight: 600;
   }
-  .badge-blue { background: rgba(41,121,255,0.15); color: var(--accent); border: 1px solid rgba(41,121,255,0.3); }
-  .badge-green { background: rgba(0,200,83,0.12); color: var(--green); border: 1px solid rgba(0,200,83,0.3); }
-  .badge-orange { background: rgba(255,152,0,0.12); color: var(--orange); border: 1px solid rgba(255,152,0,0.3); }
-  .badge-red { background: rgba(244,67,54,0.12); color: var(--red); border: 1px solid rgba(244,67,54,0.3); }
+  .badge-blue   { background: rgba(41,121,255,0.15); color: var(--accent); border: 1px solid rgba(41,121,255,0.3); }
+  .badge-green  { background: rgba(0,200,83,0.12);   color: var(--green);  border: 1px solid rgba(0,200,83,0.3); }
+  .badge-orange { background: rgba(255,152,0,0.12);  color: var(--orange); border: 1px solid rgba(255,152,0,0.3); }
+  .badge-red    { background: rgba(244,67,54,0.12);  color: var(--red);    border: 1px solid rgba(244,67,54,0.3); }
 
   .section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 14px; color: var(--text); display: flex; align-items: center; gap: 8px; }
   .protocol-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-bottom: 24px; }
@@ -204,8 +225,8 @@
     padding: 7px 14px;
     font-size: 0.72rem; font-weight: 800;
     text-transform: uppercase; letter-spacing: 1.2px;
-    color: #fff;
     user-select: none;
+    /* text color set dynamically via contrastColor() */
   }
   .skill-section-header .skill-icon { font-size: 0.95rem; }
   .skill-section-body {
@@ -335,8 +356,69 @@
   #toast.show { transform: translateY(0); opacity: 1; }
 
   /* ── Responsive ── */
-  @media (max-width: 768px) {
+  @media (max-width: 600px) {
+    /* Two-row topbar on mobile */
+    #topbar {
+      height: auto;
+      flex-wrap: wrap;
+      padding: 0;
+      gap: 0;
+    }
+
+    /* Row 1: menu + logo + action icons */
+    #topbar-row1 {
+      display: flex; align-items: center;
+      width: 100%; padding: 8px 10px; gap: 6px;
+    }
+
+    /* Row 2: search bar full width */
+    #topbar-row2 {
+      display: flex; width: 100%;
+      padding: 0 10px 8px; gap: 0;
+    }
+    #topbar-row2 #search-bar {
+      width: 100%; max-width: 100%;
+      border-radius: 20px; font-size: 1rem;
+      padding: 9px 14px;
+    }
+
+    /* Sidebar offset to account for taller topbar */
+    #sidebar {
+      position: fixed; left: 0; top: 0; bottom: 0; z-index: 200;
+      transform: translateX(-100%); width: 82vw; max-width: 300px;
+      height: 100vh;
+    }
+    #sidebar.open {
+      transform: translateX(0);
+      box-shadow: 4px 0 24px rgba(0,0,0,0.6);
+    }
+
     #menu-btn { display: flex; }
+
+    /* Hide the logo text "Command" on very small screens, keep "Med✚" */
+    .logo-text-full { display: none; }
+    .logo-text-short { display: inline; }
+
+    /* Server badge: show colored dot only, no text */
+    #server-badge .badge-text { display: none; }
+    #server-badge .badge-dot  { display: inline-block; }
+    #server-badge { background: none !important; border: none !important; padding: 0 2px !important; }
+
+    /* Icon buttons slightly larger touch targets */
+    .icon-btn { padding: 8px; font-size: 1.25rem; }
+
+    #content { padding: 12px; }
+    .protocol-grid { grid-template-columns: 1fr; }
+    .calc-grid { grid-template-columns: 1fr; }
+    .home-header { padding: 16px; }
+    .home-header h1 { font-size: 1.3rem; }
+  }
+
+  /* Tablets (sidebar slides, search stays in one row) */
+  @media (min-width: 601px) and (max-width: 900px) {
+    #menu-btn { display: flex; }
+    #topbar-row1 { display: contents; }
+    #topbar-row2 { display: contents; }
     #sidebar {
       position: fixed; left: 0; top: 56px; bottom: 0; z-index: 200;
       transform: translateX(-100%); width: 280px;
@@ -345,7 +427,13 @@
     #content { padding: 16px; }
     .protocol-grid { grid-template-columns: 1fr; }
     .calc-grid { grid-template-columns: 1fr; }
-    #search-bar { max-width: 100%; }
+  }
+
+  /* Desktop: topbar rows are display:contents so items flow normally */
+  @media (min-width: 901px) {
+    #topbar-row1 { display: contents; }
+    #topbar-row2 { display: contents; }
+    #search-bar { max-width: 420px; margin: 0 auto; }
   }
 
   /* Scrollbar */
@@ -366,16 +454,27 @@
 <body>
 
 <div id="app">
-  <!-- TOP BAR -->
+  <!-- TOP BAR — row 1: menu + logo + actions, row 2 (mobile only): search -->
   <div id="topbar">
-    <button id="menu-btn" onclick="toggleSidebar()">☰</button>
-    <div class="logo"><span class="cross">✚</span> <span>Med</span>Command</div>
-    <input type="text" id="search-bar" placeholder="Search protocols, medications, procedures…" oninput="handleSearch(this.value)">
-    <div class="topbar-actions">
-      <span id="server-badge" class="badge badge-orange" style="font-size:0.75rem;cursor:default;" title="Checking server…">⏳ Connecting</span>
-      <button class="icon-btn" onclick="toggleTheme()" title="Toggle Day/Night">🌙</button>
-      <button class="icon-btn" onclick="showPage('bookmarks')" title="Bookmarks">⭐</button>
-      <button class="icon-btn" onclick="openAdminLogin()" title="Admin Settings">⚙️</button>
+    <div id="topbar-row1">
+      <button id="menu-btn" onclick="toggleSidebar()">☰</button>
+      <div class="logo">
+        <span class="cross">✚</span>
+        <span><span class="logo-text-short" style="display:none">Med</span><span class="logo-text-full">Med</span><span style="color:var(--accent)">Command</span></span>
+      </div>
+      <input type="text" id="search-bar" placeholder="Search protocols…" oninput="handleSearch(this.value)" style="display:none">
+      <div class="topbar-actions">
+        <span id="server-badge" class="badge badge-orange" title="Checking server…">
+          <span class="badge-dot" style="background:var(--yellow)"></span>
+          <span class="badge-text">⏳ Connecting</span>
+        </span>
+        <button class="icon-btn" onclick="toggleTheme()" title="Toggle Day/Night">🌙</button>
+        <button class="icon-btn" onclick="showPage('bookmarks')" title="Bookmarks">⭐</button>
+        <button class="icon-btn" onclick="openAdminLogin()" title="Admin Settings">⚙️</button>
+      </div>
+    </div>
+    <div id="topbar-row2">
+      <input type="text" id="search-bar-mobile" placeholder="Search protocols, medications…" oninput="handleSearch(this.value)">
     </div>
   </div>
 
@@ -746,14 +845,32 @@ async function loadState() {
 function updateServerBadge(online) {
   const el = document.getElementById('server-badge');
   if (!el) return;
+  const dot  = el.querySelector('.badge-dot');
+  const text = el.querySelector('.badge-text');
   if (online) {
-    el.textContent = '🟢 Server';
+    if (dot)  { dot.style.background = 'var(--green)'; }
+    if (text) { text.textContent = '🟢 Server'; }
     el.title = 'Connected to MedCommand server — changes sync to all devices';
     el.style.color = 'var(--green)';
+    el.className = 'badge badge-green';
   } else {
-    el.textContent = '🟡 Local';
+    if (dot)  { dot.style.background = 'var(--yellow)'; }
+    if (text) { text.textContent = '🟡 Local'; }
     el.title = 'Running in standalone mode — changes saved to this browser only';
     el.style.color = 'var(--yellow)';
+    el.className = 'badge badge-orange';
+  }
+}
+
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar');
+  sb.classList.toggle('open');
+  // On mobile, fix the sidebar top to account for the two-row topbar height
+  if (window.innerWidth <= 600) {
+    sb.style.top = '0';
+  } else {
+    const topbarH = document.getElementById('topbar').offsetHeight;
+    sb.style.top = topbarH + 'px';
   }
 }
 
@@ -1450,6 +1567,21 @@ function openProtocol(id) {
   showPage('protocol');
 }
 
+// ── Contrast text color helper ──────────────────
+// Returns '#000' or '#fff' depending on which gives
+// better readability against the given hex background.
+function contrastColor(hex) {
+  // Strip # and expand shorthand (#abc → #aabbcc)
+  hex = hex.replace('#', '');
+  if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+  const r = parseInt(hex.substring(0,2), 16);
+  const g = parseInt(hex.substring(2,4), 16);
+  const b = parseInt(hex.substring(4,6), 16);
+  // Perceived luminance (WCAG formula)
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.55 ? '#000000' : '#ffffff';
+}
+
 // ── Core renderer: splits on ::: fences, renders each chunk, assembles HTML ──
 //
 // Strategy: parse the markdown line-by-line into an ordered list of "chunks":
@@ -1531,7 +1663,7 @@ function renderProtocolContent(md) {
       const lvl = state.levels.find(l => l.id.toLowerCase() === chunk.levelId) || { name: chunk.levelId.toUpperCase(), color: '#888888' };
       html += `
         <div class="skill-section" style="border-left-color:${lvl.color};">
-          <div class="skill-section-header" style="background:${lvl.color};">
+          <div class="skill-section-header" style="background:${lvl.color};color:${contrastColor(lvl.color)};">
             <span class="skill-icon">🏥</span>${lvl.name} Scope
           </div>
           <div class="skill-section-body">${renderedMd}</div>
@@ -1584,6 +1716,12 @@ function showPage(page) {
 // SEARCH
 // ══════════════════════════════════════════════════
 function handleSearch(query) {
+  // Keep both search bars in sync
+  const bar1 = document.getElementById('search-bar');
+  const bar2 = document.getElementById('search-bar-mobile');
+  if (bar1 && bar1.value !== query) bar1.value = query;
+  if (bar2 && bar2.value !== query) bar2.value = query;
+
   if (query.trim()) showPage('search');
   const list = document.getElementById('search-results-list');
   if (!query.trim()) {
@@ -2193,7 +2331,11 @@ document.querySelectorAll('.calc-modal').forEach(m => {
 document.addEventListener('keydown', e => {
   if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
     e.preventDefault();
-    document.getElementById('search-bar').focus();
+    // Focus whichever search bar is visible
+    const mob = document.getElementById('search-bar-mobile');
+    const desk = document.getElementById('search-bar');
+    if (mob && mob.offsetParent !== null) mob.focus();
+    else if (desk) desk.focus();
   }
   if (e.key === 'Escape') {
     closeCalc(); closeEditor(); closeAdminLogin();
