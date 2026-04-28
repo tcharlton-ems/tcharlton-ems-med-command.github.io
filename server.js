@@ -35,7 +35,7 @@ const crypto  = require('crypto');
 
 const app      = express();
 const PORT     = process.env.PORT || 3000;
-const DATA_FILE = path.join(__dirname, 'data.json');
+const DATA_FILE = '/app/data/data.json';
 const HTML_FILE = path.join(__dirname, 'index.html');
 
 // ── Simple in-memory token store (token → expiry ms) ──
@@ -296,6 +296,9 @@ app.put('/api/settings', requireAuth, (req, res) => {
 // ─────────────────────────────────────────────────
 // START
 // ─────────────────────────────────────────────────
+
+// Ensure the persistent data directory exists
+fs.mkdirSync(path.dirname(DATA_FILE), { recursive: true });
 
 // Initialise data.json if it doesn't exist
 if (!fs.existsSync(DATA_FILE)) {
