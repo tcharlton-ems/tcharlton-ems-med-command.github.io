@@ -449,6 +449,31 @@
   .refresh-spinner { animation: spin 1s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .inline-block { display: inline-block; }
+
+  /* ── About Section ── */
+  #about-section {
+    margin-top: 32px;
+    border-top: 1px solid var(--border);
+    padding-top: 24px;
+  }
+  #about-section .about-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px 28px;
+  }
+  #about-section .about-card h1 { font-size: 1.3rem; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin: 0.8em 0 0.5em; color: var(--text); }
+  #about-section .about-card h2 { font-size: 1.1rem; color: var(--accent); margin: 1em 0 0.4em; }
+  #about-section .about-card h3 { font-size: 0.95rem; color: var(--text2); margin: 0.8em 0 0.3em; }
+  #about-section .about-card p  { line-height: 1.75; margin-bottom: 0.75em; color: var(--text); }
+  #about-section .about-card ul,
+  #about-section .about-card ol { padding-left: 1.5em; margin-bottom: 0.75em; }
+  #about-section .about-card li { line-height: 1.7; margin-bottom: 3px; }
+  #about-section .about-card strong { color: var(--text); }
+  #about-section .about-card hr { border: none; border-top: 1px solid var(--border); margin: 1.2em 0; }
+  #about-section .about-card code { background: var(--bg3); padding: 2px 6px; border-radius: 4px; font-size: 0.85rem; }
+  #about-section .about-card blockquote { border-left: 3px solid var(--accent); padding-left: 14px; color: var(--text2); margin-bottom: 0.75em; }
+  #about-loading { color: var(--text3); font-size: 0.88rem; padding: 16px 0; }
 </style>
 </head>
 <body>
@@ -517,6 +542,13 @@
           </div>
         </div>
         <div id="home-sections"></div>
+
+        <!-- ABOUT SECTION — fetched from /api/about on page load -->
+        <div id="about-section">
+          <div class="section-title">ℹ️ About</div>
+          <div id="about-loading" style="display:none;">Loading…</div>
+          <div id="about-content" class="about-card" style="display:none;"></div>
+        </div>
       </div>
 
       <!-- SEARCH PAGE -->
@@ -1362,6 +1394,7 @@ async function init() {
   renderLevelNav();
   renderHome();
   renderCalcs();
+  loadAboutSection();
   await refreshOnLaunch();
 }
 
@@ -1472,6 +1505,38 @@ function filterByLevel(levelId) {
 
 // ══════════════════════════════════════════════════
 // HOME
+// ══════════════════════════════════════════════════
+
+// ── About Section ────────────────────────────────
+async function loadAboutSection() {
+  const loadingEl = document.getElementById('about-loading');
+  const contentEl = document.getElementById('about-content');
+  if (!loadingEl || !contentEl) return;
+
+  loadingEl.style.display = 'block';
+  contentEl.style.display = 'none';
+
+  try {
+    const data = await apiGet('/about');
+    const markdown = (data && data.about) ? data.about : '';
+    if (markdown.trim()) {
+      // marked is already loaded via CDN script tag at the top of the page
+      contentEl.innerHTML = marked.parse(markdown);
+      contentEl.style.display = 'block';
+    } else {
+      // No about content configured — hide the whole section
+      const section = document.getElementById('about-section');
+      if (section) section.style.display = 'none';
+    }
+  } catch (e) {
+    // API unavailable (standalone mode) — hide the section silently
+    const section = document.getElementById('about-section');
+    if (section) section.style.display = 'none';
+  } finally {
+    loadingEl.style.display = 'none';
+  }
+}
+
 // ══════════════════════════════════════════════════
 function renderHome() {
   const setInfo = state.sets.find(s => s.id === state.activeSet);
