@@ -946,7 +946,19 @@ function populateFieldSelects() {
 // ══════════════════════════════════════════════════
 // SETTINGS
 // ══════════════════════════════════════════════════
-function openSettings() { document.getElementById('settings-panel').classList.add('open'); renderSettingsLists(); }
+async function openSettings() {
+  document.getElementById('settings-panel').classList.add('open');
+  renderSettingsLists();
+  // Always fetch the latest about content from the API when the panel opens
+  // so the textarea is never stale or empty.
+  try {
+    const aboutRes = await fetch('/api/about').then(r => r.json());
+    document.getElementById('s-about').value = aboutRes.about || '';
+  } catch(e) {
+    console.error('Failed to load about content:', e);
+    toast('Could not load About content: ' + e.message, 'error');
+  }
+}
 function closeSettings() { document.getElementById('settings-panel').classList.remove('open'); }
 
 document.getElementById('settings-panel').addEventListener('click', e => {
