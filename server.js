@@ -345,13 +345,30 @@ app.put('/api/settings', requireAuth, (req, res) => {
 // START
 // ─────────────────────────────────────────────────
 
+const INIT_MARKER = path.join(path.dirname(DATA_FILE), '.initialized');
+
 // Ensure the persistent data directory exists
 fs.mkdirSync(path.dirname(DATA_FILE), { recursive: true });
 
-// Initialise data.json if it doesn't exist
-if (!fs.existsSync(DATA_FILE)) {
+// Initialise data.json exactly once — on the very first startup when the
+// volume is empty.  The marker file (.initialized) is written alongside
+// data.json and persists across all subsequent reboots and redeployments.
+// Once the marker exists we never touch data.json at startup; it is only
+// modified through the admin settings API.
+if (!fs.existsSync(INIT_MARKER)) {
+  // First-ever startup: seed default data and stamp the volume.
   saveData(getDefaultData());
-  console.log('Created fresh data.json with default data.');
+  fs.writeFileSync(INIT_MARKER, new Date().toISOString(), 'utf8');
+  console.log('First startup — created data.json with default data and wrote .initialized marker.');
+} else {
+  // Volume already initialised — leave data.json untouched.
+  if (!fs.existsSync(DATA_FILE)) {
+    console.warn('WARNING: .initialized marker exists but data.json is missing. ' +
+      'The file may have been manually deleted. ' +
+      'data.json will NOT be recreated automatically — restore it from a backup or remove the .initialized marker to reseed defaults.');
+  } else {
+    console.log('Volume already initialised — loading existing data.json.');
+  }
 }
 
 app.listen(PORT, () => {
