@@ -92,23 +92,23 @@ function getDefaultData() {
 
 ## Agency Information
 
-**Agency Name:** Your EMS Agency Name  
-**Service Area:** Your Service Area  
+**Agency Name:** Academy of Medicine of Cincinnati  
+**Service Area:** Greater Cincinnati  
 **Agency Type:** ALS / BLS Transport
 
 ---
 
-## Medical Direction
+## Developer
 
-**Medical Director:** Medical Director Name, MD  
-**Contact:** medical.director@example.com
+**Medical Director:** Thomas E. Charlton, MD  
+**Contact:** tcharlton@emsdoctors.com
 
 ---
 
 ## Protocol Information
 
-**Protocol Version:** 2025.1  
-**Effective Date:** January 1, 2025  
+**Protocol Version:** 2026  
+**Effective Date:** January 1, 2026  
 **Review Cycle:** Annual
 
 These protocols are intended for use by licensed EMS personnel operating under the medical direction of the agency medical director. All personnel are expected to be familiar with and adhere to these protocols.
