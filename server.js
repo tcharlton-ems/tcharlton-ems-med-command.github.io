@@ -21,7 +21,8 @@
  *   POST   /api/levels             Create level
  *   DELETE /api/levels/:id         Delete level
  *   POST   /api/auth               Verify admin password → returns token
- *   PUT    /api/settings           Update settings (password, etc.)
+ *   PUT    /api/settings           Update settings (password, about, etc.)
+ *   GET    /api/about              Retrieve about content (public)
  *   POST   /api/refresh            Trigger a refresh (updates lastRefresh timestamp)
  */
 
@@ -86,7 +87,43 @@ function getDefaultData() {
       { id: 'aemt',      name: 'AEMT',      color: '#00bcd4' },
       { id: 'paramedic', name: 'Paramedic', color: '#9c27b0' }
     ],
-    protocols: []
+    protocols: [],
+    about: `# About These Protocols
+
+## Agency Information
+
+**Agency Name:** Your EMS Agency Name  
+**Service Area:** Your Service Area  
+**Agency Type:** ALS / BLS Transport
+
+---
+
+## Medical Direction
+
+**Medical Director:** Medical Director Name, MD  
+**Contact:** medical.director@example.com
+
+---
+
+## Protocol Information
+
+**Protocol Version:** 2025.1  
+**Effective Date:** January 1, 2025  
+**Review Cycle:** Annual
+
+These protocols are intended for use by licensed EMS personnel operating under the medical direction of the agency medical director. All personnel are expected to be familiar with and adhere to these protocols.
+
+---
+
+## Licensing & Scope
+
+All providers must maintain current licensure with the state EMS regulatory authority and operate within their defined scope of practice. These protocols do not supersede state or local regulations.
+
+---
+
+## Disclaimer
+
+These protocols are for use by trained EMS professionals only. Clinical judgment should always be applied in conjunction with these guidelines.`
   };
 }
 
@@ -282,12 +319,23 @@ app.delete('/api/levels/:id', requireAuth, (req, res) => {
 });
 
 // ─────────────────────────────────────────────────
-// SETTINGS (password change)
+// ABOUT  (read = public, write = admin via settings)
+// ─────────────────────────────────────────────────
+app.get('/api/about', (req, res) => {
+  const data = loadData();
+  res.json({ about: data.about || '' });
+});
+
+// ─────────────────────────────────────────────────
+// SETTINGS (password change, about content)
 // ─────────────────────────────────────────────────
 app.put('/api/settings', requireAuth, (req, res) => {
   const data = loadData();
   if (req.body.newPassword) {
     data.adminPasswordHash = hashPassword(req.body.newPassword);
+  }
+  if (typeof req.body.about === 'string') {
+    data.about = req.body.about;
   }
   saveData(data);
   res.json({ ok: true });
