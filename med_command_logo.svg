@@ -1,0 +1,37 @@
+<svg width="100%" viewBox="0 0 380 420" role="img" xmlns="http://www.w3.org/2000/svg" style="">
+  <title style="fill:rgb(0, 0, 0);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">Med Command logo</title>
+  <desc style="fill:rgb(0, 0, 0);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">EMS protocol application logo featuring a bold shield with a medical cross, titled Med Command</desc>
+
+  <defs>
+    
+  </defs>
+
+  <!-- Shield body -->
+  <path d="M190 38 L272 72 L272 178 Q272 248 190 290 Q108 248 108 178 L108 72 Z" fill="#1a3a7c" stroke-width="2.5" style="fill:rgb(26, 58, 124);stroke:rgb(200, 208, 222);color:rgb(0, 0, 0);stroke-width:2.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Shield inner highlight band -->
+  <path d="M190 52 L260 82 L260 178 Q260 238 190 276 Q120 238 120 178 L120 82 Z" fill="#1e4499" style="fill:rgb(30, 68, 153);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Red cross horizontal bar -->
+  <rect x="143" y="148" width="94" height="34" rx="5" fill="#d42b2b" style="fill:rgb(212, 43, 43);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <!-- Red cross vertical bar -->
+  <rect x="173" y="118" width="34" height="94" rx="5" fill="#d42b2b" style="fill:rgb(212, 43, 43);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Cross center brightener -->
+  <rect x="173" y="148" width="34" height="34" rx="3" fill="#e83838" style="fill:rgb(232, 56, 56);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Shield bottom point accent -->
+  <path d="M175 276 Q190 290 205 276 L190 290 Z" fill="#c8392b" style="fill:rgb(200, 57, 43);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Pulse / EKG line across shield bottom area -->
+  <polyline points="130,240 148,240 156,222 163,258 171,230 179,248 187,240 250,240" fill="none" stroke="#4fc3f7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.85" style="fill:none;stroke:rgb(79, 195, 247);color:rgb(0, 0, 0);stroke-width:2.5px;stroke-linecap:round;stroke-linejoin:round;opacity:0.85;font-family:&quot;Anthropic Sans&quot;, -apple-system, &quot;system-ui&quot;, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Wordmark: MED -->
+  <text x="190" y="338" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-size="42" font-weight="900" letter-spacing="10" style="fill:rgb(26, 35, 64);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Arial Black&quot;, Arial, sans-serif;font-size:42px;font-weight:900;text-anchor:middle;dominant-baseline:auto">MED</text>
+
+  <!-- Wordmark: COMMAND -->
+  <text x="190" y="374" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" letter-spacing="8" fill="#c8392b" style="fill:rgb(200, 57, 43);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:Arial, sans-serif;font-size:22px;font-weight:700;text-anchor:middle;dominant-baseline:auto">COMMAND</text>
+
+  <!-- Tagline -->
+  <text x="190" y="402" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="400" letter-spacing="3" style="fill:rgb(90, 106, 133);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:Arial, sans-serif;font-size:11px;font-weight:400;text-anchor:middle;dominant-baseline:auto">EMS PROTOCOL SYSTEM</text>
+</svg>
