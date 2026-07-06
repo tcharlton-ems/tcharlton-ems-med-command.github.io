@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MedCommand EMS Protocols</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<script src="/vendor/marked.min.js"></script>
+<script src="/vendor/purify.min.js"></script>
 <style>
   :root {
     --bg: #0a0e1a;
@@ -150,10 +151,10 @@
     display: inline-flex; align-items: center; gap: 5px;
     padding: 4px 12px; border-radius: 16px; font-size: 0.78rem; font-weight: 600;
   }
-  .badge-blue   { background: rgba(41,121,255,0.15); color: var(--accent); border: 1px solid rgba(41,121,255,0.3); }
-  .badge-green  { background: rgba(0,200,83,0.12);   color: var(--green);  border: 1px solid rgba(0,200,83,0.3); }
-  .badge-orange { background: rgba(255,152,0,0.12);  color: var(--orange); border: 1px solid rgba(255,152,0,0.3); }
-  .badge-red    { background: rgba(244,67,54,0.12);  color: var(--red);    border: 1px solid rgba(244,67,54,0.3); }
+  .badge-blue { background: rgba(41,121,255,0.15); color: var(--accent); border: 1px solid rgba(41,121,255,0.3); }
+  .badge-green { background: rgba(0,200,83,0.12); color: var(--green); border: 1px solid rgba(0,200,83,0.3); }
+  .badge-orange { background: rgba(255,152,0,0.12); color: var(--orange); border: 1px solid rgba(255,152,0,0.3); }
+  .badge-red { background: rgba(244,67,54,0.12); color: var(--red); border: 1px solid rgba(244,67,54,0.3); }
 
   .section-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 14px; color: var(--text); display: flex; align-items: center; gap: 8px; }
   .protocol-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-bottom: 24px; }
@@ -225,8 +226,8 @@
     padding: 7px 14px;
     font-size: 0.72rem; font-weight: 800;
     text-transform: uppercase; letter-spacing: 1.2px;
+    color: #fff;
     user-select: none;
-    /* text color set dynamically via contrastColor() */
   }
   .skill-section-header .skill-icon { font-size: 0.95rem; }
   .skill-section-body {
@@ -449,7 +450,6 @@
   .refresh-spinner { animation: spin 1s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .inline-block { display: inline-block; }
-
 </style>
 </head>
 <body>
@@ -518,7 +518,6 @@
           </div>
         </div>
         <div id="home-sections"></div>
-
       </div>
 
       <!-- SEARCH PAGE -->
@@ -1415,7 +1414,7 @@ function toggleSidebar() {
 function renderSetSelector() {
   const sel = document.getElementById('protocol-set-select');
   sel.innerHTML = state.sets.map(s =>
-    `<option value="${s.id}" ${s.id === state.activeSet ? 'selected' : ''}>${s.name}</option>`
+    `<option value="${esc(s.id)}" ${s.id === state.activeSet ? 'selected' : ''}>${esc(s.name)}</option>`
   ).join('');
 }
 
@@ -1436,9 +1435,9 @@ function renderTagNav() {
     (p.tags || []).forEach(t => { counts[t] = (counts[t] || 0) + 1; });
   });
   container.innerHTML = state.tags.map(t => `
-    <button class="nav-item ${activeTagFilter === t.id ? 'active' : ''}" onclick="filterByTag('${t.id}')">
+    <button class="nav-item ${activeTagFilter === t.id ? 'active' : ''}" onclick="filterByTag('${esc(t.id)}')">
       <span class="tag-dot" style="background:${t.color}"></span>
-      ${t.name}
+      ${esc(t.name)}
       <span class="count">${counts[t.id] || 0}</span>
     </button>
   `).join('');
@@ -1447,9 +1446,9 @@ function renderTagNav() {
 function renderLevelNav() {
   const container = document.getElementById('level-filter-nav');
   container.innerHTML = state.levels.map(l => `
-    <button class="nav-item ${activeLevelFilter === l.id ? 'active' : ''}" onclick="filterByLevel('${l.id}')">
+    <button class="nav-item ${activeLevelFilter === l.id ? 'active' : ''}" onclick="filterByLevel('${esc(l.id)}')">
       <span class="tag-dot" style="background:${l.color}"></span>
-      ${l.name}
+      ${esc(l.name)}
     </button>
   `).join('');
 }
@@ -1474,8 +1473,6 @@ function filterByLevel(levelId) {
 
 // ══════════════════════════════════════════════════
 // HOME
-// ══════════════════════════════════════════════════
-
 // ══════════════════════════════════════════════════
 function renderHome() {
   const setInfo = state.sets.find(s => s.id === state.activeSet);
@@ -1508,7 +1505,7 @@ function renderHome() {
     return `
       <div class="section-title">
         <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${tag.color};"></span>
-        ${tag.name}
+        ${esc(tag.name)}
       </div>
       <div class="protocol-grid">${cards}</div>
     `;
@@ -1526,17 +1523,17 @@ function renderHome() {
 
 function renderProtocolCard(p) {
   const level = state.levels.find(l => l.id === p.level);
-  const levelBadge = level ? `<span class="level-badge" style="background:${level.color}22;color:${level.color};border:1px solid ${level.color}44;">${level.name}</span>` : '';
+  const levelBadge = level ? `<span class="level-badge" style="background:${level.color}22;color:${level.color};border:1px solid ${level.color}44;">${esc(level.name)}</span>` : '';
   const tagBadges = (p.tags || []).map(tId => {
     const t = state.tags.find(t => t.id === tId);
-    return t ? `<span class="tag-badge" style="border-color:${t.color}44;color:${t.color};">${t.name}</span>` : '';
+    return t ? `<span class="tag-badge" style="border-color:${t.color}44;color:${t.color};">${esc(t.name)}</span>` : '';
   }).join('');
   const isBookmarked = state.bookmarks.includes(p.id);
   const level0 = state.levels.find(l => l.id === p.level);
   const borderColor = level0 ? level0.color : 'var(--border)';
   return `
-    <div class="protocol-card" onclick="openProtocol('${p.id}')" style="border-left-color:${borderColor};">
-      <div class="card-title">${p.title}</div>
+    <div class="protocol-card" onclick="openProtocol('${esc(p.id)}')" style="border-left-color:${borderColor};">
+      <div class="card-title">${esc(p.title)}</div>
       <div class="card-meta">${levelBadge}${tagBadges}</div>
       <span class="bookmark-star ${isBookmarked ? 'active' : ''}" data-id="${p.id}">★</span>
     </div>
@@ -1552,12 +1549,12 @@ function openProtocol(id) {
   document.getElementById('detail-title').textContent = p.title;
 
   const level = state.levels.find(l => l.id === p.level);
-  const levelBadge = level ? `<span class="level-badge" style="background:${level.color}22;color:${level.color};border:1px solid ${level.color}44;">${level.name}</span>` : '';
+  const levelBadge = level ? `<span class="level-badge" style="background:${level.color}22;color:${level.color};border:1px solid ${level.color}44;">${esc(level.name)}</span>` : '';
   const tagBadges = (p.tags || []).map(tId => {
     const t = state.tags.find(t => t.id === tId);
-    return t ? `<span class="tag-badge" style="border-color:${t.color}44;color:${t.color};">${t.name}</span>` : '';
+    return t ? `<span class="tag-badge" style="border-color:${t.color}44;color:${t.color};">${esc(t.name)}</span>` : '';
   }).join('');
-  const revised = p.revised ? `<span style="color:var(--text3);font-size:0.8rem;">Revised: ${p.revised}</span>` : '';
+  const revised = p.revised ? `<span style="color:var(--text3);font-size:0.8rem;">Revised: ${esc(p.revised)}</span>` : '';
   document.getElementById('detail-meta').innerHTML = levelBadge + tagBadges + revised;
 
   const bodyEl = document.getElementById('detail-body');
@@ -1571,19 +1568,28 @@ function openProtocol(id) {
   showPage('protocol');
 }
 
-// ── Contrast text color helper ──────────────────
-// Returns '#000' or '#fff' depending on which gives
-// better readability against the given hex background.
-function contrastColor(hex) {
-  // Strip # and expand shorthand (#abc → #aabbcc)
-  hex = hex.replace('#', '');
-  if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
-  const r = parseInt(hex.substring(0,2), 16);
-  const g = parseInt(hex.substring(2,4), 16);
-  const b = parseInt(hex.substring(4,6), 16);
-  // Perceived luminance (WCAG formula)
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance > 0.55 ? '#000000' : '#ffffff';
+// Escape a string for safe interpolation into innerHTML templates.
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// Sanitize rendered markdown before it reaches innerHTML. Protocol content
+// can originate from imported Word/Markdown files, so it is not trusted HTML.
+// Called after fixProtocolLinks so protocol: links (already converted to
+// data attributes) survive sanitization.
+function sanitizeHtml(html) {
+  return DOMPurify.sanitize(html);
+}
+
+// Pick black or white text for readable contrast against an arbitrary
+// user-configured background color (skill-level colors are freely chosen
+// in Settings and can be light, e.g. yellow, where white text fails contrast).
+function contrastText(hex) {
+  const c = (hex || '#888888').replace('#', '');
+  const r = parseInt(c.substr(0, 2), 16), g = parseInt(c.substr(2, 2), 16), b = parseInt(c.substr(4, 2), 16);
+  const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+  return yiq >= 128 ? '#111318' : '#fff';
 }
 
 // ── Core renderer: splits on ::: fences, renders each chunk, assembles HTML ──
@@ -1653,22 +1659,22 @@ function renderProtocolContent(md) {
   if (usedLevels.length) {
     const items = usedLevels.map(lid => {
       const lvl = state.levels.find(l => l.id.toLowerCase() === lid) || { name: lid, color: '#888' };
-      return `<span class="skill-legend-item"><span class="skill-legend-dot" style="background:${lvl.color};"></span>${lvl.name}</span>`;
+      return `<span class="skill-legend-item"><span class="skill-legend-dot" style="background:${lvl.color};"></span>${esc(lvl.name)}</span>`;
     }).join('');
     html += `<div class="skill-legend"><strong style="margin-right:6px;color:var(--text2);">Skill Levels:</strong>${items}</div>`;
   }
 
   // Render chunks
   for (const chunk of chunks) {
-    const renderedMd = fixProtocolLinks(marked.parse(chunk.text));
+    const renderedMd = sanitizeHtml(fixProtocolLinks(marked.parse(chunk.text)));
     if (chunk.type === 'plain') {
       html += renderedMd;
     } else {
       const lvl = state.levels.find(l => l.id.toLowerCase() === chunk.levelId) || { name: chunk.levelId.toUpperCase(), color: '#888888' };
       html += `
         <div class="skill-section" style="border-left-color:${lvl.color};">
-          <div class="skill-section-header" style="background:${lvl.color};color:${contrastColor(lvl.color)};">
-            <span class="skill-icon">🏥</span>${lvl.name} Scope
+          <div class="skill-section-header" style="background:${lvl.color};color:${contrastText(lvl.color)};">
+            <span class="skill-icon">🏥</span>${esc(lvl.name)} Scope
           </div>
           <div class="skill-section-body">${renderedMd}</div>
         </div>`;
@@ -1726,7 +1732,10 @@ function handleSearch(query) {
   if (bar1 && bar1.value !== query) bar1.value = query;
   if (bar2 && bar2.value !== query) bar2.value = query;
 
-  if (query.trim()) showPage('search');
+  // Guard against showPage↔handleSearch mutual recursion: showPage('search')
+  // re-invokes handleSearch when a query is present, so only navigate if we
+  // aren't already on the search page.
+  if (query.trim() && currentPage !== 'search') showPage('search');
   const list = document.getElementById('search-results-list');
   if (!query.trim()) {
     list.innerHTML = '<div class="no-results">Start typing to search protocols…</div>';
@@ -1739,16 +1748,16 @@ function handleSearch(query) {
     (p.tags || []).some(t => t.includes(q))
   );
   if (!results.length) {
-    list.innerHTML = '<div class="no-results">No protocols found for "' + query + '"</div>';
+    list.innerHTML = '<div class="no-results">No protocols found for "' + esc(query) + '"</div>';
     return;
   }
   list.innerHTML = results.map(p => {
     const snippet = getSnippet(p.content || '', q);
     const level = state.levels.find(l => l.id === p.level);
     return `
-      <div class="search-item" onclick="openProtocol('${p.id}')">
+      <div class="search-item" onclick="openProtocol('${esc(p.id)}')">
         <h4>${highlight(p.title, q)}</h4>
-        ${level ? `<span class="level-badge" style="background:${level.color}22;color:${level.color};font-size:0.7rem;padding:1px 6px;border-radius:4px;">${level.name}</span>` : ''}
+        ${level ? `<span class="level-badge" style="background:${level.color}22;color:${level.color};font-size:0.7rem;padding:1px 6px;border-radius:4px;">${esc(level.name)}</span>` : ''}
         <p style="margin-top:6px;">${snippet}</p>
       </div>
     `;
@@ -1758,16 +1767,18 @@ function handleSearch(query) {
 function getSnippet(text, query) {
   const plain = text.replace(/[#*`>|\-\[\]]/g, ' ').replace(/\s+/g, ' ');
   const idx = plain.toLowerCase().indexOf(query);
-  if (idx < 0) return plain.slice(0, 120) + '…';
+  if (idx < 0) return esc(plain.slice(0, 120)) + '…';
   const start = Math.max(0, idx - 40);
   const end = Math.min(plain.length, idx + 80);
   return (start > 0 ? '…' : '') + highlight(plain.slice(start, end), query) + (end < plain.length ? '…' : '');
 }
 
+// HTML-escapes the text, then wraps query matches — output is innerHTML-safe.
 function highlight(text, query) {
-  if (!query) return text;
-  const re = new RegExp('(' + query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
-  return text.replace(re, '<span class="search-highlight">$1</span>');
+  const safe = esc(text);
+  if (!query) return safe;
+  const re = new RegExp('(' + esc(query).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+  return safe.replace(re, '<span class="search-highlight">$1</span>');
 }
 
 // ══════════════════════════════════════════════════
@@ -2010,9 +2021,9 @@ function renderAdminPage() {
   const setList = document.getElementById('set-list');
   setList.innerHTML = state.sets.map(s => `
     <div class="level-item">
-      <div class="level-name">${s.name}</div>
-      ${s.url ? `<span style="font-size:0.78rem;color:var(--text3);">${s.url}</span>` : ''}
-      <button class="tag-remove" onclick="removeSet('${s.id}')">✕</button>
+      <div class="level-name">${esc(s.name)}</div>
+      ${s.url ? `<span style="font-size:0.78rem;color:var(--text3);">${esc(s.url)}</span>` : ''}
+      <button class="tag-remove" onclick="removeSet('${esc(s.id)}')">✕</button>
     </div>
   `).join('');
 
@@ -2020,8 +2031,8 @@ function renderAdminPage() {
   document.getElementById('admin-tag-list').innerHTML = state.tags.map(t => `
     <div class="tag-item">
       <span class="color-dot" style="background:${t.color};"></span>
-      ${t.name}
-      <button class="tag-remove" onclick="removeTag('${t.id}')">✕</button>
+      ${esc(t.name)}
+      <button class="tag-remove" onclick="removeTag('${esc(t.id)}')">✕</button>
     </div>
   `).join('');
 
@@ -2029,27 +2040,27 @@ function renderAdminPage() {
   document.getElementById('admin-levels-list').innerHTML = state.levels.map(l => `
     <div class="level-item">
       <span class="level-color-box" style="background:${l.color};" title="Color"></span>
-      <span class="level-name">${l.name}</span>
-      <button class="tag-remove" onclick="removeLevel('${l.id}')">✕</button>
+      <span class="level-name">${esc(l.name)}</span>
+      <button class="tag-remove" onclick="removeLevel('${esc(l.id)}')">✕</button>
     </div>
   `).join('');
 
   // Protocol list
   const pl = document.getElementById('admin-protocol-list');
   pl.innerHTML = state.protocols.map(p => `
-    <div class="admin-protocol-item" onclick="openProtocolEditor('${p.id}')">
-      <span style="flex:1;">${p.title}</span>
-      <span style="font-size:0.75rem;color:var(--text3);">${state.sets.find(s=>s.id===p.setId)?.name || ''}</span>
+    <div class="admin-protocol-item" onclick="openProtocolEditor('${esc(p.id)}')">
+      <span style="flex:1;">${esc(p.title)}</span>
+      <span style="font-size:0.75rem;color:var(--text3);">${esc(state.sets.find(s=>s.id===p.setId)?.name || '')}</span>
     </div>
   `).join('');
 
   // Update set selector in editor
   const editSetSel = document.getElementById('edit-prot-set');
-  editSetSel.innerHTML = state.sets.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+  editSetSel.innerHTML = state.sets.map(s => `<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('');
 
   // Level selector
   const editLvl = document.getElementById('edit-prot-level');
-  editLvl.innerHTML = state.levels.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
+  editLvl.innerHTML = state.levels.map(l => `<option value="${esc(l.id)}">${esc(l.name)}</option>`).join('');
 }
 
 async function addProtocolSet() {
@@ -2170,9 +2181,9 @@ function openProtocolEditor(id) {
   editingProtocolId = id;
   const modal = document.getElementById('editor-modal');
   const editSetSel = document.getElementById('edit-prot-set');
-  editSetSel.innerHTML = state.sets.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+  editSetSel.innerHTML = state.sets.map(s => `<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('');
   const editLvl = document.getElementById('edit-prot-level');
-  editLvl.innerHTML = state.levels.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
+  editLvl.innerHTML = state.levels.map(l => `<option value="${esc(l.id)}">${esc(l.name)}</option>`).join('');
 
   if (id) {
     const p = state.protocols.find(pr => pr.id === id);

@@ -18,8 +18,11 @@ const crypto = require('crypto');
 const DATA_FILE = path.join(__dirname, 'data.json');
 const newPassword = process.argv[2] || 'admin123';
 
+// Must match server.js: scrypt with per-password random salt
 function hashPassword(pw) {
-  return crypto.createHash('sha256').update(pw + 'medcmd_salt').digest('hex');
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hash = crypto.scryptSync(String(pw), salt, 64).toString('hex');
+  return `scrypt$${salt}$${hash}`;
 }
 
 if (!fs.existsSync(DATA_FILE)) {
@@ -34,7 +37,6 @@ try {
   console.log('');
   console.log('✅  Password updated successfully.');
   console.log('    New password: ' + newPassword);
-  console.log('    Hash:         ' + data.adminPasswordHash);
   console.log('');
   console.log('    Restart the server and log in with the new password.');
   console.log('');

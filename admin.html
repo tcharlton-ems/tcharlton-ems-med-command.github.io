@@ -4,7 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MedCommand — Admin Editor</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<script src="/vendor/marked.min.js"></script>
+<script src="/vendor/purify.min.js"></script>
 <style>
 :root {
   --bg:      #0a0e1a;
@@ -171,7 +172,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 
 /* Skill-level sections in preview */
 .skill-section { border-left: 5px solid #888; border-radius: 0 8px 8px 0; margin: 12px 0; overflow: hidden; }
-.skill-section-header { padding: 6px 12px; font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; }
+.skill-section-header { padding: 6px 12px; font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #fff; display: flex; align-items: center; gap: 6px; }
 .skill-section-body { padding: 10px 14px 4px; background: var(--card); }
 .skill-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; padding: 8px 12px; background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; font-size: .76rem; }
 .skill-legend-item { display: flex; align-items: center; gap: 5px; font-weight: 700; }
@@ -226,6 +227,40 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 .tag-chip .chip-dot { width: 9px; height: 9px; border-radius: 50%; }
 .chip-del { background: none; border: none; color: var(--text3); cursor: pointer; font-size: .95rem; padding: 0 1px; }
 .chip-del:hover { color: var(--red); }
+
+/* ── Category tag picker (editor toolbar) ── */
+.tag-picker { position: relative; }
+.tag-picker-btn {
+  display: flex; align-items: center; gap: 6px; cursor: pointer;
+  min-width: 170px; max-width: 260px; text-align: left;
+}
+.tag-picker-btn .tp-summary { flex: 1; display: flex; flex-wrap: wrap; gap: 3px; align-items: center; overflow: hidden; }
+.tag-picker-btn .tp-placeholder { color: var(--text3); }
+.tag-picker-btn .tp-caret { color: var(--text3); font-size: .7rem; flex-shrink: 0; }
+.tp-mini-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.tp-mini-chip {
+  display: inline-flex; align-items: center; gap: 3px;
+  background: var(--bg4); border-radius: 3px; padding: 1px 5px; font-size: .74rem; line-height: 1.4;
+}
+.tag-picker-menu {
+  display: none; position: absolute; top: calc(100% + 4px); left: 0; z-index: 50;
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 6px;
+  box-shadow: var(--shadow); padding: 6px; min-width: 220px; max-height: 260px; overflow-y: auto;
+}
+.tag-picker-menu.open { display: block; }
+.tag-picker-menu .tp-empty { color: var(--text3); font-size: .82rem; padding: 6px 8px; }
+.tp-option {
+  display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 4px;
+  cursor: pointer; font-size: .85rem; user-select: none;
+}
+.tp-option:hover { background: var(--bg3); }
+.tp-option .tp-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.tp-check {
+  width: 14px; height: 14px; border-radius: 3px; border: 1px solid var(--border);
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  font-size: .7rem; line-height: 1; color: #fff;
+}
+.tp-check.checked { background: var(--accent); border-color: var(--accent); }
 
 /* ── Login modal ── */
 #login-modal {
@@ -290,9 +325,6 @@ textarea.import-ta:focus { border-color: var(--accent); }
     <input type="password" id="pw-input" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
     <button class="btn btn-primary" style="width:100%" onclick="doLogin()">Sign In</button>
     <div id="login-err">Incorrect password — please try again.</div>
-    <div style="margin-top:14px;font-size:.78rem;color:var(--text3);">
-      Default password: <code style="background:var(--bg3);padding:1px 5px;border-radius:3px;">admin123</code>
-    </div>
   </div>
 </div>
 
@@ -303,7 +335,10 @@ textarea.import-ta:focus { border-color: var(--accent); }
   <h2>Protocol Editor</h2>
   <div class="spacer"></div>
   <span id="save-status" class="status-saved" style="display:none"></span>
-  <button class="btn btn-ghost" onclick="openImport()" title="Bulk import protocols from JSON">⬆ Import</button>
+  <button class="btn btn-ghost" onclick="downloadBackup()" title="Download a backup of all protocols">⬇ Backup</button>
+  <button class="btn btn-ghost" onclick="document.getElementById('restore-file').click()" title="Restore protocols from a backup file">⟲ Restore</button>
+  <input type="file" id="restore-file" accept=".json,application/json" style="display:none" onchange="restoreBackup(this)">
+  <button class="btn btn-ghost" onclick="openImport()" title="Bulk import protocols from Word, Markdown, or JSON">⬆ Import</button>
   <button class="btn btn-ghost" onclick="openSettings()">⚙ Settings</button>
   <button class="btn btn-primary" id="save-btn" onclick="saveCurrentProtocol()" disabled>💾 Save Protocol</button>
   <a href="/" class="btn btn-ghost" title="Back to protocol viewer">← Viewer</a>
@@ -350,9 +385,13 @@ textarea.import-ta:focus { border-color: var(--accent); }
           <label>Skill Level</label>
           <select id="f-level" class="field-input" onchange="markUnsaved()"></select>
         </div>
-        <div class="field-group">
-          <label>Tags (comma separated)</label>
-          <input type="text" id="f-tags" class="field-input" style="min-width:160px" placeholder="medical, trauma" oninput="markUnsaved()">
+        <div class="field-group tag-picker">
+          <label>Category Tags</label>
+          <button type="button" class="field-input tag-picker-btn" id="tag-picker-btn" onclick="toggleTagPicker(event)">
+            <span class="tp-summary" id="tp-summary"><span class="tp-placeholder">Select tags…</span></span>
+            <span class="tp-caret">▾</span>
+          </button>
+          <div class="tag-picker-menu" id="tag-picker-menu"></div>
         </div>
         <div class="field-group">
           <label>Revised</label>
@@ -457,7 +496,23 @@ textarea.import-ta:focus { border-color: var(--accent); }
 <div id="import-modal">
   <div class="import-box">
     <h2>⬆ Bulk Import Protocols</h2>
-    <p>Paste a JSON array of protocol objects. Each object needs at minimum a <code>title</code> and <code>content</code> field. Missing fields will use defaults. Existing protocols with matching IDs will be updated.</p>
+
+    <div class="settings-section" style="margin-bottom:14px;">
+      <h3 style="margin-top:0;">Upload Word / Markdown Files</h3>
+      <p style="margin:0 0 8px;">
+        Select one or more <code>.docx</code>, <code>.md</code>, <code>.markdown</code>, or <code>.txt</code> files.
+        Each is converted into the app's protocol format and appended to the JSON below for review before importing.
+        Optional front matter at the top of a file (<code>title:</code>, <code>tags:</code>, <code>level:</code>, <code>set:</code>, <code>revised:</code> between two <code>---</code> lines) sets metadata directly;
+        otherwise the title comes from the first heading or the filename.
+      </p>
+      <div class="s-row">
+        <input type="file" id="import-files" accept=".docx,.md,.markdown,.txt" multiple style="flex:1;">
+        <button class="btn btn-primary" onclick="convertImportFiles()">Convert Files</button>
+      </div>
+      <div id="import-files-status" style="margin-top:6px;font-size:.8rem;color:var(--text3);"></div>
+    </div>
+
+    <p>Or paste a JSON array of protocol objects directly. Each object needs at minimum a <code>title</code> and <code>content</code> field. Missing fields will use defaults. Existing protocols with matching IDs will be updated.</p>
     <textarea class="import-ta" id="import-ta" placeholder='[
   {
     "id": "p009",
@@ -481,25 +536,13 @@ textarea.import-ta:focus { border-color: var(--accent); }
 
 <script>
 // ══════════════════════════════════════════════════
-// CONTRAST COLOR HELPER
-// ══════════════════════════════════════════════════
-function contrastColor(hex) {
-  hex = hex.replace('#', '');
-  if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
-  const r = parseInt(hex.substring(0,2), 16);
-  const g = parseInt(hex.substring(2,4), 16);
-  const b = parseInt(hex.substring(4,6), 16);
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-  return luminance > 0.55 ? '#000000' : '#ffffff';
-}
-
-// ══════════════════════════════════════════════════
 // STATE
 // ══════════════════════════════════════════════════
 let token = sessionStorage.getItem('medcmd_token') || null;
 let state = { sets: [], tags: [], levels: [], protocols: [] };
 let currentId = null;
 let unsaved = false;
+let selectedTags = []; // category tag ids for the protocol currently open in the editor
 let previewTimer = null;
 let activeSetFilter = 'all';
 
@@ -580,6 +623,7 @@ function rebuildUI() {
   populateFieldSelects();
   renderSettingsLists();
   renderSyntaxBar();
+  renderTagPicker();
 }
 
 // ══════════════════════════════════════════════════
@@ -589,7 +633,7 @@ function renderSetTabs() {
   const el = document.getElementById('set-tabs');
   el.innerHTML = `<span class="set-tab ${activeSetFilter==='all'?'active':''}" onclick="setFilter('all')">All</span>` +
     state.sets.map(s =>
-      `<span class="set-tab ${activeSetFilter===s.id?'active':''}" onclick="setFilter('${s.id}')">${s.name}</span>`
+      `<span class="set-tab ${activeSetFilter===s.id?'active':''}" onclick="setFilter('${esc(s.id)}')">${esc(s.name)}</span>`
     ).join('');
 }
 
@@ -609,21 +653,21 @@ function renderList() {
   document.getElementById('proto-count').textContent = `(${state.protocols.length})`;
 
   if (!protos.length) {
-    el.innerHTML = `<div class="no-protos">${q ? 'No results for "'+q+'"' : 'No protocols yet.<br>Click + New Protocol to start.'}</div>`;
+    el.innerHTML = `<div class="no-protos">${q ? 'No results for "'+esc(q)+'"' : 'No protocols yet.<br>Click + New Protocol to start.'}</div>`;
     return;
   }
 
   el.innerHTML = protos.map(p => {
     const lvl = state.levels.find(l => l.id === p.level);
     const dot  = lvl ? `<span class="pi-dot" style="background:${lvl.color}"></span>` : '';
-    const badge = lvl ? `<span class="pi-badge" style="background:${lvl.color}22;color:${lvl.color};border:1px solid ${lvl.color}44">${lvl.name}</span>` : '';
+    const badge = lvl ? `<span class="pi-badge" style="background:${lvl.color}22;color:${lvl.color};border:1px solid ${lvl.color}44">${esc(lvl.name)}</span>` : '';
     const setName = (state.sets.find(s => s.id === p.setId) || {}).name || '';
     return `
-      <div class="proto-item ${p.id === currentId ? 'active' : ''}" onclick="selectProtocol('${p.id}')">
+      <div class="proto-item ${p.id === currentId ? 'active' : ''}" onclick="selectProtocol('${esc(p.id)}')">
         ${dot}
         <div style="flex:1;min-width:0;">
-          <div class="pi-title">${p.title}</div>
-          <div class="pi-set">${setName}</div>
+          <div class="pi-title">${esc(p.title)}</div>
+          <div class="pi-set">${esc(setName)}</div>
         </div>
         ${badge}
       </div>`;
@@ -647,9 +691,10 @@ function selectProtocol(id) {
   document.getElementById('f-title').value   = p.title   || '';
   document.getElementById('f-set').value     = p.setId   || (state.sets[0]?.id || '');
   document.getElementById('f-level').value   = p.level   || (state.levels[0]?.id || '');
-  document.getElementById('f-tags').value    = (p.tags||[]).join(', ');
+  selectedTags = [...(p.tags || [])];
   document.getElementById('f-revised').value = p.revised || '';
   document.getElementById('protocol-editor').value = p.content || '';
+  renderTagPicker();
 
   updateMeta();
   updatePreview();
@@ -669,9 +714,10 @@ function newProtocol() {
   document.getElementById('f-title').value   = '';
   document.getElementById('f-set').value     = state.sets[0]?.id || '';
   document.getElementById('f-level').value   = state.levels[0]?.id || '';
-  document.getElementById('f-tags').value    = '';
+  selectedTags = [];
   document.getElementById('f-revised').value = new Date().toISOString().split('T')[0];
   document.getElementById('protocol-editor').value = defaultTemplate();
+  renderTagPicker();
 
   updateMeta();
   updatePreview();
@@ -695,7 +741,7 @@ async function saveCurrentProtocol() {
     title,
     setId:   document.getElementById('f-set').value,
     level:   document.getElementById('f-level').value,
-    tags:    document.getElementById('f-tags').value.split(',').map(t=>t.trim()).filter(Boolean),
+    tags:    [...selectedTags],
     revised: document.getElementById('f-revised').value,
     content: document.getElementById('protocol-editor').value,
   };
@@ -787,6 +833,22 @@ function updatePreview() {
   document.getElementById('preview-body').innerHTML = html;
 }
 
+// Escape a string for safe interpolation into innerHTML templates.
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c =>
+    ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// Pick black or white text for readable contrast against an arbitrary
+// user-configured background color (skill-level colors are freely chosen
+// in Settings and can be light, e.g. yellow, where white text fails contrast).
+function contrastText(hex) {
+  const c = (hex || '#888888').replace('#', '');
+  const r = parseInt(c.substr(0, 2), 16), g = parseInt(c.substr(2, 2), 16), b = parseInt(c.substr(4, 2), 16);
+  const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+  return yiq >= 128 ? '#111318' : '#fff';
+}
+
 // ── Fence renderer (same logic as main app) ──────
 function renderProtocolContent(md) {
   const levelIds = state.levels.map(l => l.id.toLowerCase());
@@ -818,19 +880,23 @@ function renderProtocolContent(md) {
   if (usedLevels.length) {
     const items = usedLevels.map(lid => {
       const lvl = state.levels.find(l=>l.id.toLowerCase()===lid) || { name: lid, color: '#888' };
-      return `<span class="skill-legend-item"><span class="skill-legend-dot" style="background:${lvl.color}"></span>${lvl.name}</span>`;
+      return `<span class="skill-legend-item"><span class="skill-legend-dot" style="background:${lvl.color}"></span>${esc(lvl.name)}</span>`;
     }).join('');
     html += `<div class="skill-legend"><strong style="margin-right:6px;color:var(--text2)">Skill Levels:</strong>${items}</div>`;
   }
 
   for (const chunk of chunks) {
-    const rendered = marked.parse(chunk.text).replace(/href="protocol:([^"]+)"/g, 'href="#" data-pid="$1" title="Protocol: $1"');
+    // Sanitize after the protocol-link rewrite so those links survive; protocol
+    // content can come from imported files and is not trusted HTML.
+    const rendered = DOMPurify.sanitize(
+      marked.parse(chunk.text).replace(/href="protocol:([^"]+)"/g, 'href="#" data-pid="$1" title="Protocol: $1"')
+    );
     if (chunk.type === 'plain') {
       html += rendered;
     } else {
       const lvl = state.levels.find(l=>l.id.toLowerCase()===chunk.levelId) || { name: chunk.levelId.toUpperCase(), color: '#888888' };
       html += `<div class="skill-section" style="border-left-color:${lvl.color}">
-        <div class="skill-section-header" style="background:${lvl.color};color:${contrastColor(lvl.color)}">🏥 ${lvl.name} Scope</div>
+        <div class="skill-section-header" style="background:${lvl.color};color:${contrastText(lvl.color)}">🏥 ${esc(lvl.name)} Scope</div>
         <div class="skill-section-body">${rendered}</div>
       </div>`;
     }
@@ -859,7 +925,7 @@ function renderSyntaxBar() {
   ];
 
   const levelBtns = state.levels.map(l =>
-    `<button class="syn-btn fence-btn" onclick="insertSnippet('::: ${l.id}\\n\\n:::')" title="Insert ${l.name} section">::: ${l.id}</button>`
+    `<button class="syn-btn fence-btn" onclick="insertSnippet('::: ${esc(l.id)}\\n\\n:::')" title="Insert ${esc(l.name)} section">::: ${esc(l.id)}</button>`
   ).join('');
 
   bar.innerHTML = snippets.map(([label, snippet]) =>
@@ -924,19 +990,72 @@ function populateFieldSelects() {
   const lvlEl = document.getElementById('f-level');
   const curSet = setEl.value;
   const curLvl = lvlEl.value;
-  setEl.innerHTML = state.sets.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
-  lvlEl.innerHTML = state.levels.map(l => `<option value="${l.id}">${l.name}</option>`).join('');
+  setEl.innerHTML = state.sets.map(s => `<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('');
+  lvlEl.innerHTML = state.levels.map(l => `<option value="${esc(l.id)}">${esc(l.name)}</option>`).join('');
   if (curSet) setEl.value = curSet;
   if (curLvl) lvlEl.value = curLvl;
 }
 
 // ══════════════════════════════════════════════════
+// CATEGORY TAG PICKER
+// ══════════════════════════════════════════════════
+// Drops stale ids (tags deleted in Settings since this protocol was saved)
+// so the summary/save payload never reference a tag that no longer exists.
+function pruneSelectedTags() {
+  const validIds = new Set(state.tags.map(t => t.id));
+  selectedTags = selectedTags.filter(id => validIds.has(id));
+}
+
+function renderTagPicker() {
+  pruneSelectedTags();
+
+  const menu = document.getElementById('tag-picker-menu');
+  menu.innerHTML = state.tags.length
+    ? state.tags.map(t => {
+        const checked = selectedTags.includes(t.id);
+        return `
+          <div class="tp-option" onclick="toggleTagSelection('${esc(t.id)}')">
+            <span class="tp-check ${checked ? 'checked' : ''}">${checked ? '✓' : ''}</span>
+            <span class="tp-dot" style="background:${t.color}"></span>
+            ${esc(t.name)}
+          </div>`;
+      }).join('')
+    : '<div class="tp-empty">No category tags yet — add some in Settings.</div>';
+
+  const summary = document.getElementById('tp-summary');
+  summary.innerHTML = selectedTags.length
+    ? selectedTags.map(id => {
+        const t = state.tags.find(x => x.id === id);
+        return t ? `<span class="tp-mini-chip"><span class="tp-mini-dot" style="background:${t.color}"></span>${esc(t.name)}</span>` : '';
+      }).join('')
+    : '<span class="tp-placeholder">Select tags…</span>';
+}
+
+function toggleTagSelection(id) {
+  selectedTags = selectedTags.includes(id) ? selectedTags.filter(x => x !== id) : [...selectedTags, id];
+  renderTagPicker();
+  markUnsaved();
+}
+
+function toggleTagPicker(e) {
+  e.stopPropagation();
+  document.getElementById('tag-picker-menu').classList.toggle('open');
+}
+
+document.addEventListener('click', e => {
+  // Use composedPath (captured at dispatch time), not e.target/contains() —
+  // selecting an option rebuilds the menu's innerHTML synchronously during
+  // the bubble phase, which detaches e.target before it reaches here and
+  // makes a plain `.contains(e.target)` check always report "outside".
+  const path = e.composedPath ? e.composedPath() : [e.target];
+  const insidePicker = path.some(el => el.classList && el.classList.contains('tag-picker'));
+  if (!insidePicker) document.getElementById('tag-picker-menu').classList.remove('open');
+});
+
+// ══════════════════════════════════════════════════
 // SETTINGS
 // ══════════════════════════════════════════════════
-function openSettings() {
-  document.getElementById('settings-panel').classList.add('open');
-  renderSettingsLists();
-}
+function openSettings() { document.getElementById('settings-panel').classList.add('open'); renderSettingsLists(); }
 function closeSettings() { document.getElementById('settings-panel').classList.remove('open'); }
 
 document.getElementById('settings-panel').addEventListener('click', e => {
@@ -946,15 +1065,15 @@ document.getElementById('settings-panel').addEventListener('click', e => {
 function renderSettingsLists() {
   // Sets
   document.getElementById('s-sets-list').innerHTML = state.sets.map(s =>
-    `<div class="tag-chip"><span>${s.name}</span><button class="chip-del" onclick="removeSet('${s.id}')">✕</button></div>`
+    `<div class="tag-chip"><span>${esc(s.name)}</span><button class="chip-del" onclick="removeSet('${esc(s.id)}')">✕</button></div>`
   ).join('');
   // Tags
   document.getElementById('s-tags-list').innerHTML = state.tags.map(t =>
-    `<div class="tag-chip"><span class="chip-dot" style="background:${t.color}"></span>${t.name}<button class="chip-del" onclick="removeTag('${t.id}')">✕</button></div>`
+    `<div class="tag-chip"><span class="chip-dot" style="background:${t.color}"></span>${esc(t.name)}<button class="chip-del" onclick="removeTag('${esc(t.id)}')">✕</button></div>`
   ).join('');
   // Levels
   document.getElementById('s-levels-list').innerHTML = state.levels.map(l =>
-    `<div class="tag-chip"><span class="chip-dot" style="background:${l.color}"></span>${l.name}<button class="chip-del" onclick="removeLevel('${l.id}')">✕</button></div>`
+    `<div class="tag-chip"><span class="chip-dot" style="background:${l.color}"></span>${esc(l.name)}<button class="chip-del" onclick="removeLevel('${esc(l.id)}')">✕</button></div>`
   ).join('');
 }
 
@@ -1037,8 +1156,84 @@ async function changePassword() {
 // ══════════════════════════════════════════════════
 // BULK IMPORT
 // ══════════════════════════════════════════════════
+async function restoreBackup(input) {
+  const file = input.files[0];
+  input.value = ''; // allow re-selecting the same file later
+  if (!file) return;
+
+  if (!confirm(`Restore from "${file.name}"?\n\nThis replaces all current protocols with the backup's contents. A snapshot of the current data is saved on the server first, so this can be undone.`)) return;
+
+  const formData = new FormData();
+  formData.append('file', file);
+  try {
+    const res = await fetch('/api/backup/restore', {
+      method: 'POST',
+      headers: token ? { 'Authorization': 'Bearer ' + token } : {},
+      body: formData
+    });
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(payload.error || res.statusText);
+
+    currentId = null;
+    unsaved = false;
+    document.getElementById('editor-wrap').style.display = 'none';
+    document.getElementById('empty-state').style.display = 'flex';
+    document.getElementById('save-btn').disabled = true;
+    await loadAll();
+    toast(`Restored ${payload.protocols} protocol(s) from backup ✓`, 'success');
+  } catch (e) {
+    toast('Restore failed: ' + e.message, 'error');
+  }
+}
+
+function downloadBackup() {
+  const a = document.createElement('a');
+  a.href = '/api/backup/download';
+  a.download = '';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  toast('Backup download started', 'success');
+}
+
 function openImport()  { document.getElementById('import-modal').classList.add('open'); }
 function closeImport() { document.getElementById('import-modal').classList.remove('open'); }
+
+async function convertImportFiles() {
+  const input = document.getElementById('import-files');
+  const statusEl = document.getElementById('import-files-status');
+  if (!input.files.length) { toast('Choose one or more files first', 'error'); return; }
+
+  const formData = new FormData();
+  for (const file of input.files) formData.append('files', file);
+
+  statusEl.textContent = 'Converting…';
+  try {
+    const res = await fetch('/api/import/convert', {
+      method: 'POST',
+      headers: token ? { 'Authorization': 'Bearer ' + token } : {},
+      body: formData
+    });
+    const payload = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(payload.error || res.statusText);
+    const { protocols, errors } = payload;
+
+    const ta = document.getElementById('import-ta');
+    let existing = [];
+    if (ta.value.trim()) {
+      try { existing = JSON.parse(ta.value); if (!Array.isArray(existing)) existing = []; } catch { existing = []; }
+    }
+    ta.value = JSON.stringify(existing.concat(protocols), null, 2);
+
+    statusEl.textContent = `Converted ${protocols.length} file(s)` +
+      (errors.length ? `, ${errors.length} failed: ` + errors.map(e => e.file + ' (' + e.error + ')').join('; ') : '.');
+    input.value = '';
+    toast(`Converted ${protocols.length} file(s) — review below, then Import Protocols`, errors.length ? 'error' : 'success');
+  } catch (e) {
+    statusEl.textContent = '';
+    toast('Conversion failed: ' + e.message, 'error');
+  }
+}
 
 document.getElementById('import-modal').addEventListener('click', e => {
   if (e.target === document.getElementById('import-modal')) closeImport();
