@@ -1,0 +1,146 @@
+{
+  "lastRefresh": "2026-07-05T21:05:11.623Z",
+  "lastSaved": "2026-07-05T21:19:38.969Z",
+  "adminPasswordHash": "9884e4281da2a703fd7a2e692cad4b183f2844d00b5d40042c195f9973f324ad",
+  "sets": [
+    {
+      "id": "set1",
+      "name": "ALS Protocols 2025",
+      "url": ""
+    },
+    {
+      "id": "set2",
+      "name": "BLS Protocols 2025",
+      "url": ""
+    }
+  ],
+  "tags": [
+    {
+      "id": "medical",
+      "name": "Medical",
+      "color": "#2979ff"
+    },
+    {
+      "id": "trauma",
+      "name": "Trauma",
+      "color": "#f44336"
+    },
+    {
+      "id": "pediatric",
+      "name": "Pediatric",
+      "color": "#ff9800"
+    },
+    {
+      "id": "cardiology",
+      "name": "Cardiology",
+      "color": "#e91e63"
+    },
+    {
+      "id": "respiratory",
+      "name": "Respiratory",
+      "color": "#00bcd4"
+    },
+    {
+      "id": "obstetrics",
+      "name": "Obstetrics",
+      "color": "#9c27b0"
+    },
+    {
+      "id": "procedure",
+      "name": "Procedure",
+      "color": "#607d8b"
+    },
+    {
+      "id": "administrative",
+      "name": "Administrative",
+      "color": "#795548"
+    },
+    {
+      "id": "appendix",
+      "name": "Appendix",
+      "color": "#9e9e9e"
+    }
+  ],
+  "levels": [
+    {
+      "id": "oh-emt",
+      "name": "OH-EMT",
+      "color": "#f28e02"
+    },
+    {
+      "id": "oh-all",
+      "name": "OH-ALL",
+      "color": "#f28e02"
+    },
+    {
+      "id": "oh-medic",
+      "name": "OH-Medic",
+      "color": "#f28e02"
+    },
+    {
+      "id": "all",
+      "name": "ALL",
+      "color": "#217902"
+    },
+    {
+      "id": "emt",
+      "name": "EMT",
+      "color": "#f90126"
+    },
+    {
+      "id": "medic",
+      "name": "Medic",
+      "color": "#0160f9"
+    },
+    {
+      "id": "ky-all",
+      "name": "KY-ALL",
+      "color": "#f7f95d"
+    },
+    {
+      "id": "ky-emt",
+      "name": "KY-EMT",
+      "color": "#f7f95d"
+    },
+    {
+      "id": "ky-medic",
+      "name": "KY-Medic",
+      "color": "#f7f95d"
+    },
+    {
+      "id": "in-all",
+      "name": "IN-ALL",
+      "color": "#b904fb"
+    },
+    {
+      "id": "in-emt",
+      "name": "IN-EMT",
+      "color": "#b904fb"
+    },
+    {
+      "id": "in-medic",
+      "name": "IN-Medic",
+      "color": "#b904fb"
+    }
+  ],
+  "protocols": [
+    {
+      "title": "T715: Sedation after Intubation",
+      "setId": "set1",
+      "level": "paramedic",
+      "tags": [],
+      "revised": "2026-07-05",
+      "content": "<h1 id=\"sedation-after-intubation\">Sedation after Intubation</h1>\n<h2 id=\"all\">ALL</h2>\n<p><strong>I. GOAL OF PROTOCOL</strong></p>\n<p>A. There is a clear need for EMS providers to have the capability to sedate patients after intubation. This is an appropriate intervention for the benefit of the patient to treat the discomfort and anxiety that accompanies intubation.</p>\n<p>B. Sedation makes it easier to ventilate the patient, can potentially decrease oxygen demand and makes it less likely that the patient will dislodge the endotracheal tube</p>\n<p><strong>II. CONSIDERATIONS</strong></p>\n<p>G. Inadequate post intubation management leads to increased pain, anxiety and possibly increased oxygen demand.</p>\n<p>H. Post intubation medication management should include a pain medication and a sedative.</p>\n<p>I. Pain should be assessed early and often.</p>\n<p>J. Medications for pain and sedation are often not immediately available on arrival to the emergency department so medics should continue appropriate dosing up to the transition of care.</p>\n<p><strong>III. INCLUSION CRITERIA</strong></p>\n<p>A. Intubated patient is requiring pain medication and sedation</p>\n<p>B. Patient Intubated with Endotracheal Tube and tube appropriately secured</p>\n<p>C. ET tube position has been confirmed</p>\n<p>D. Patient monitoring has been established and must include – Cardiac Monitor, Continuous Pulse Ox and Continuous ETCO2</p>\n<p><strong>IV. EXCLUSION CRITERIA</strong></p>\n<p>A. Age – no age exclusions</p>\n<p>B. Allergies – to medications in protocol</p>\n<p>C. Patients that are completely unresponsive do not require sedation but patients that have previously been given a paralytic agent should be given appropriate sedation.</p>\n::: emt\n<h2 id=\"emt\">EMT</h2>\n<p><strong>V. ANY INTUBATED PATIENT MUST BE UNDER THE CARE OF AN ALS PROVIDER</strong></p>\n<p>A. While sedation can only be administered by paramedics, after an advanced airway is placed and confirmed, basic EMTs may initiate transport and request ALS intercept if an ALS provider is not immediately available on scene.</p>\n<p>B. EMTs must ensure appropriate monitoring and documentation are continued during transport until care is transferred to ALS or the receiving facility.</p>\n:::\n::: paramedic\n\n<h2\n\nid=\"medic\">Medic</h2>\n<p><strong>VI. PROTOCOL</strong></p>\n<p>A. Confirm successful placement of ET tube</p>\n<p>B. Initiate and continue required monitoring</p>\n<p>C. Establish and maintain vascular access (IV or IO)</p>\n<p>D. Assess patient’s level of alertness and pain before and after medication administration, document any change in patient’s condition and/or every 10 minutes</p>\n<p>E. Administer Medication(s) per the following table, administer follow up doses as necessary</p>\n<p>F. Notify ED of incoming intubated patient and notify ED staff of sedation that was administered at the time of patient transfer of care</p>\n<p>G. All doses below are for administration in the time frame outlined, as needed to maintain sedation.</p>\n\n<table>\n<thead>\n<tr>\n<th>SBP &gt;150 or at risk for hypertension: Examples: stroke, stimulant overdose</th>\n<th></th>\n<th>SBP &lt;100 or at risk of hypotension: Examples: trauma, sepsis, shock, asthma</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Fentanyl 1mcg/kg (max single dose 200mcg) IV/IO every 5 minutes  -OR-  Morphine 0.1mg/kg (max single dose 10mg) IV/IO every 10 minutes  -PLUS-  Midazolam 0.05mg/kg (max single dose 5mg) IV/IO every 5 minutes</td>\n<td>Patients that are normotensive who are not determined to be at risk of complications of hypertension or hypotension may be treated with either medication regiment.</td>\n<td>Ketamine 2mg/kg IV/IO, then 1mg/kg every 5 minutes.   Appropriate resuscitation should be initiated based on patient condition.  It is acceptable to use push dose epi to offset the hemodynamic effects of sedation.</td>\n</tr>\n</tbody>\n</table>",
+      "id": "p_1783285666464_ita20"
+    },
+    {
+      "title": "Do Not Resuscitate Orders in the Field",
+      "setId": "set1",
+      "level": "emt",
+      "tags": [],
+      "revised": "2026-07-05",
+      "content": "# Do Not Resuscitate Orders in the Field\n\n::: OH-ALL\n  \n**I. General**\n\nA. In accordance with Ohio Revised Code Sections 2133.21-2133.26, providers will consider and honor all valid Ohio Do Not Resuscitate Orders/Identification.\n\nB. There are two valid DNR orders:\n\n1. DNR Comfort Care (DNRCC): effective as soon as an authorized healthcare provider signs the form.\n\n2. DNR Comfort Care – Arrest (DNRCC-Arrest): does not become effective until a person experiences cardiac or respiratory arrest.\n\nC. \"DNR identification\" means a standardized identification card, form, necklace, or bracelet that is of uniform size and design, that has been approved by the department of health pursuant to section 2133.25 of the Revised Code, bearing the Ohio DNR logo.\n\nD. No other medical orders, directions, or other instructions should be written on a DNR order form. Anything written on the DNR order form other than the information required for completion of the DNR order form does not have to be followed by EMS or other health care providers.\n\n**II. Protocol**\n\nA. Individuals with either a DNRCC or DNRCC-Arrest, which is activated, **will** receive the following care:\n\n1. Conduct an initial assessment\n\n2. Perform basic medical care\n\n3. Clear airway of obstruction or suction\n\n4. If necessary, (for comfort of the patient) may administer oxygen, CPAP, or BiPAP\n\n5. If necessary, (for comfort of the patient) may obtain IV access for hydration or pain medication to relieve discomfort, but not to prolong death\n\n6. If possible, may contact other appropriate health care providers\n\nB. Once the DNR protocol is activated, EMS personnel **will not**:\n\n1. Perform CPR\n\n2. Insert artificial airway adjunct (intubation, ventilator, etc.)\n\n3. Administer medications with the intent of restarting the heart or breathing\n\n4. Defibrillate, cardiovert, or initiate pacing\n\n5. Initiate continuous cardiac monitoring\n\nC. In the event a DNR is presented to EMS that is neither of the above (I.B.), then communication with a base hospital physician, EMS medical advisor, personal physician, physician on the scene, physician assistant, or advanced practice registered nurse I shall be established.\n\nD. A DNR shall NOT BE HONORED where the patient is pregnant, where withholding CPR would terminate the pregnancy.\n\nE. In the case of any doubt or reservation as to the validity or authenticity of any DNR, and absent authorization by a base hospital physician, EMS medical advisor, personal physician, physician on the scene, physician assistant, or advanced practice registered nurse I to withhold CPR, the Medic/EMT shall provide CPR to the patient and shall document the reasons for not complying with the DNR.\n\nF. In the event resuscitation is initiated on a patient and then a valid DNR is subsequently identified, resuscitation may be terminated in compliance with that DNR. Documentation shall be made on the run sheet indicating the events that happened set forth in chronological order. In the event a DNR is identified after a patient has been intubated, the tube shall not be removed in the prehospital setting. If the initial resuscitation has restored cardiac rhythm, the patient should be transported to the nearest appropriate medical facility with no further procedures or pharmacological measures undertaken, except by authorization from the base hospital physician, medical advisor, or attending physician. Communication with a physician should be established.\n\nG. When the DNR Comfort Care protocol is performed, the suggested documentation on the patient care report should include the following information:\n\n1. The document identifying the DNR Comfort Care status of the patient.\n\n2. The method of verification of the patient’s identity if any was found through reasonable efforts.\n\n3. DNR Comfort Care or DNR Comfort Care-Arrest classification.\n\n4. All actions taken to implement the DNR Comfort Care protocol.\n\n5. All unusual events occurring enroute or on scene including interactions with family members, bystanders, or health care providers.\n \n\nREFERENCE: A. Ohio Department of Health\n:::\n\n::: KY-ALL\n\n**The KY section is a copy of the Commonweath's DNR form.  Please reference the PDF version of the protocol or the Commonweath's website.**\n:::",
+      "id": "p_1783286065070_rgtp7"
+    }
+  ]
+}

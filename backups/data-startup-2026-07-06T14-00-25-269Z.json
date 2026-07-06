@@ -1,0 +1,194 @@
+{
+  "lastRefresh": "2026-07-06T13:52:05.082Z",
+  "lastSaved": "2026-07-06T13:54:47.988Z",
+  "adminPasswordHash": "scrypt$14e99b58ff7447309c6c460cb752672f$e12131fb629c213dc6e877b98b6c0ed7c5eaa46f3e17df2e85c25689bb06e68eb8911c0b625bf3570ea99d0cc1c6e3970436943c85f1350d13cebf74c300702f",
+  "sets": [
+    {
+      "id": "set1",
+      "name": "ALS Protocols 2025",
+      "url": ""
+    },
+    {
+      "id": "set2",
+      "name": "BLS Protocols 2025",
+      "url": ""
+    }
+  ],
+  "tags": [
+    {
+      "id": "medical",
+      "name": "Medical",
+      "color": "#2979ff"
+    },
+    {
+      "id": "trauma",
+      "name": "Trauma",
+      "color": "#f44336"
+    },
+    {
+      "id": "pediatric",
+      "name": "Pediatric",
+      "color": "#ff9800"
+    },
+    {
+      "id": "cardiology",
+      "name": "Cardiology",
+      "color": "#e91e63"
+    },
+    {
+      "id": "respiratory",
+      "name": "Respiratory",
+      "color": "#00bcd4"
+    },
+    {
+      "id": "obstetrics",
+      "name": "Obstetrics",
+      "color": "#9c27b0"
+    },
+    {
+      "id": "procedure",
+      "name": "Procedure",
+      "color": "#607d8b"
+    },
+    {
+      "id": "administrative",
+      "name": "Administrative",
+      "color": "#795548"
+    },
+    {
+      "id": "appendix",
+      "name": "Appendix",
+      "color": "#9e9e9e"
+    }
+  ],
+  "levels": [
+    {
+      "id": "oh-emt",
+      "name": "OH-EMT",
+      "color": "#f28e02"
+    },
+    {
+      "id": "oh-all",
+      "name": "OH-ALL",
+      "color": "#f28e02"
+    },
+    {
+      "id": "oh-medic",
+      "name": "OH-Medic",
+      "color": "#f28e02"
+    },
+    {
+      "id": "all",
+      "name": "ALL",
+      "color": "#217902"
+    },
+    {
+      "id": "emt",
+      "name": "EMT",
+      "color": "#f90126"
+    },
+    {
+      "id": "medic",
+      "name": "Medic",
+      "color": "#0160f9"
+    },
+    {
+      "id": "ky-all",
+      "name": "KY-ALL",
+      "color": "#f7f95d"
+    },
+    {
+      "id": "ky-emt",
+      "name": "KY-EMT",
+      "color": "#f7f95d"
+    },
+    {
+      "id": "ky-medic",
+      "name": "KY-Medic",
+      "color": "#f7f95d"
+    },
+    {
+      "id": "in-all",
+      "name": "IN-ALL",
+      "color": "#b904fb"
+    },
+    {
+      "id": "in-emt",
+      "name": "IN-EMT",
+      "color": "#b904fb"
+    },
+    {
+      "id": "in-medic",
+      "name": "IN-Medic",
+      "color": "#b904fb"
+    }
+  ],
+  "protocols": [
+    {
+      "title": "Do Not Resuscitate Orders in the Field",
+      "setId": "set1",
+      "level": "all",
+      "tags": [
+        "Administrative"
+      ],
+      "revised": "2026-07-05",
+      "content": "# Do Not Resuscitate Orders in the Field\n\n::: OH-ALL\n  \n**I. General**\n\nA. In accordance with Ohio Revised Code Sections 2133.21-2133.26, providers will consider and honor all valid Ohio Do Not Resuscitate Orders/Identification.\n\nB. There are two valid DNR orders:\n\n1. DNR Comfort Care (DNRCC): effective as soon as an authorized healthcare provider signs the form.\n\n2. DNR Comfort Care – Arrest (DNRCC-Arrest): does not become effective until a person experiences cardiac or respiratory arrest.\n\nC. \"DNR identification\" means a standardized identification card, form, necklace, or bracelet that is of uniform size and design, that has been approved by the department of health pursuant to section 2133.25 of the Revised Code, bearing the Ohio DNR logo.\n\nD. No other medical orders, directions, or other instructions should be written on a DNR order form. Anything written on the DNR order form other than the information required for completion of the DNR order form does not have to be followed by EMS or other health care providers.\n\n**II. Protocol**\n\nA. Individuals with either a DNRCC or DNRCC-Arrest, which is activated, **will** receive the following care:\n\n1. Conduct an initial assessment\n\n2. Perform basic medical care\n\n3. Clear airway of obstruction or suction\n\n4. If necessary, (for comfort of the patient) may administer oxygen, CPAP, or BiPAP\n\n5. If necessary, (for comfort of the patient) may obtain IV access for hydration or pain medication to relieve discomfort, but not to prolong death\n\n6. If possible, may contact other appropriate health care providers\n\nB. Once the DNR protocol is activated, EMS personnel **will not**:\n\n1. Perform CPR\n\n2. Insert artificial airway adjunct (intubation, ventilator, etc.)\n\n3. Administer medications with the intent of restarting the heart or breathing\n\n4. Defibrillate, cardiovert, or initiate pacing\n\n5. Initiate continuous cardiac monitoring\n\nC. In the event a DNR is presented to EMS that is neither of the above (I.B.), then communication with a base hospital physician, EMS medical advisor, personal physician, physician on the scene, physician assistant, or advanced practice registered nurse I shall be established.\n\nD. A DNR shall NOT BE HONORED where the patient is pregnant, where withholding CPR would terminate the pregnancy.\n\nE. In the case of any doubt or reservation as to the validity or authenticity of any DNR, and absent authorization by a base hospital physician, EMS medical advisor, personal physician, physician on the scene, physician assistant, or advanced practice registered nurse I to withhold CPR, the Medic/EMT shall provide CPR to the patient and shall document the reasons for not complying with the DNR.\n\nF. In the event resuscitation is initiated on a patient and then a valid DNR is subsequently identified, resuscitation may be terminated in compliance with that DNR. Documentation shall be made on the run sheet indicating the events that happened set forth in chronological order. In the event a DNR is identified after a patient has been intubated, the tube shall not be removed in the prehospital setting. If the initial resuscitation has restored cardiac rhythm, the patient should be transported to the nearest appropriate medical facility with no further procedures or pharmacological measures undertaken, except by authorization from the base hospital physician, medical advisor, or attending physician. Communication with a physician should be established.\n\nG. When the DNR Comfort Care protocol is performed, the suggested documentation on the patient care report should include the following information:\n\n1. The document identifying the DNR Comfort Care status of the patient.\n\n2. The method of verification of the patient’s identity if any was found through reasonable efforts.\n\n3. DNR Comfort Care or DNR Comfort Care-Arrest classification.\n\n4. All actions taken to implement the DNR Comfort Care protocol.\n\n5. All unusual events occurring enroute or on scene including interactions with family members, bystanders, or health care providers.\n \n\nREFERENCE: A. Ohio Department of Health\n:::\n\n::: KY-ALL\n\n**The KY section is a copy of the Commonweath's DNR form.  Please reference the PDF version of the protocol or the Commonweath's website.**\n:::",
+      "id": "p_1783286423143_55g5s"
+    },
+    {
+      "title": "A105: Determination of Death / Termination of Resuscitation",
+      "setId": "set1",
+      "level": "all",
+      "tags": [
+        "Administrative"
+      ],
+      "revised": "2026-07-05",
+      "content": "# A105: Determination of Death / Termination of Resuscitation\n\n::: ALL\n\nI. Basic and/or Advanced cardiac life support must be started on all patients who are found apneic and pulseless, UNLESS:\n\nA. A valid Do Not Resuscitate order is presented as defined in the Do Not Resuscitate Protocol, OR\n\nB. The patient’s body is unable to undergo resuscitative measures (CPR, ventilatory management,) such as decapitation, hemicorpectomy, severe and complete crush injury, or burned beyond resuscitative capability/recognition. Isolated penetrating trauma should rarely be considered incompatible with life OR\n\nC. The victim shows signs of rigor mortis (in a warm environment), dependent lividity, or decomposition.\n\nD. During a mass casualty incident, (MCI) the patient is designated as deceased or expectant by the locally accepted MCI triage protocols. **Such patients should be reevaluated as resources allow**.\n:::\n\n::: MEDIC\n  \nE. If the patient has either blunt or penetrating trauma, refer to protocol S509.\n:::\n\n::: ALL\n  \n\nII. Resuscitation efforts may be terminated by the prehospital personnel under the following circumstances:\n\nA. If resuscitation was started prior to the discovery of an approved DNR directive OR\n\nB. If upon further examination, the patient meets the determination of death criteria above OR\n\nC. If the following Medic conditions are met\n:::\n\n::: Medic\n\nIII. Medics may terminate resuscitative efforts and not transport patients under active CPR if all of the following exist:\n\nA. Good contact between the paramedic unit and the medical control physician.\n\nB. Successful airway management and medication administration consistent with other protocols in this document.\n\nC. At least 30 minutes of resuscitative efforts\n\nD. NO sustained return of spontaneous circulation at any time (palpable pulse greater than 60 beats per minute for at least one five-minute period).\n\nE. NO spontaneous respiration: eye opening, motor response, or other neurologic activity at the time stopping resuscitation is contemplated.\n\nF. The cardiac rhythm is NOT persistent or recurrent ventricular fibrillation or ventricular tachycardia.\n\nG. All paramedics and the medical control physician agree with termination of the resuscitation.\n\nH. The suspected cause of the cardiac arrest must be something other than hypothermia, electrocution, lightning strike.\n\nI. While patients who are pregnant may not themselves benefit from longer resuscitation, the unborn fetus may benefit from emergency c-caesarian section. Consequently, it is recommended to transport pregnant patients even if there has been no return of spontaneous circulation.\n:::\n\n::: ALL\n\nIV. Post-termination Body Movement (a good faith effort to categorize the cause of death is reasonable)\n\nA. Likely homicide – avoid body movement unless necessary for life safety; consider involving law enforcement and/or the coroners office.\n\nB. Likely natural causes – body may be relocated as appropriate for the situation and public good.\n\nC. Unclear cause – avoid disturbance unless necessary  for life safety; consider involving law enforcement and/or the coroner’s office.\n:::\n\n::: Medic\n  \nV. Termination of resuscitation (TOR) inside an ambulance\n\nA. TOR enroute is reasonable if the patient meets criteria in section III.\n\nB. After TOR, the ambulance should continue non-emergency to the destination hospital.\n\nC. Body may be removed from the ambulance after TOR, assuming the ambulance is not the site of homicide.\n\nD. Such instances should be exceedingly rare.\n:::\n\n::: ALL\n**Notes:**\n\nA. The purpose behind the termination of resuscitation in the field is to keep EMS unit’s in-service for emergencies instead of transporting non-salvageable patients under resuscitative efforts. This protocol provides a method for terminating resuscitation in hopeless cases.\n\nB. Studies have shown that manual CPR during transport is usually not performed well even with the best intentions. For adults with the current training and equipment that is available in the pre-  \n\nhospital setting clearly demonstrates that if a patient does not have a return of spontaneous circulation in the pre-hospital setting then they are very unlikely to have it after being transported to the ER. It is acceptable to have longer scene times in these cases to prevent unnecessary transport.\n\nC. It is good to contact medical control for special situations that need further exploration.\n\nD. Rigor mortis takes a variable amount of time to begin depending upon the physical condition of the deceased prior to death as well as the temperature of the environment. The face and neck begin to stiffen between two and five hours after death. After seven to nine hours, rigor mortis will affect the arms and chest. By twelve hours after death, rigor mortis is usually firmly established. Post-mortem lividity (the pooling of blood at the dependent portions of the body) will occur unless the victim has suffered a large blood loss. About one to two hours after death, lividity will begin and peak at about six hours.\n\nE. Leaving a deceased person at home after termination of resuscitation efforts may present logistical challenges with what to do with the body. The Protocol Committee strongly encourages conversations between Fire/EMS and police departments to establish procedures for this situation.\n\n  \n\n_If one pronounces an infant or child dead in the field, here are some helpful suggestions:_\n\nA. Pick a quiet environment to inform the family and try to be on the family’s level. Sit if they are sitting and match their tone of voice and posture.\n\nB. Refer to the child by his/her name.\n\nC. Use concrete words such as “is dead” or “has died.” Euphemisms are not “gentler” and may lead to confusion.\n\nD. Parents and caregivers often do not want to hear the details of the resuscitation. Instead, offer statements such as “Everything was done for your child.” or, “We made every effort to help your child.”\n\nE. Avoid statements like “I know how you feel.” Instead, use words like “This must be so difficult.”\n\nF. Be compassionate and non-accusatory, even if you think there may have been child maltreatment. Those issues are to be worked out later and not by you.\n\nG. If a statement of sympathy feels right, do not be afraid to express it. “I am so sorry.” Families remember kindness and sincerity.\n\nH. Take care of yourself, find a way to decompress and discuss what you have experienced. Few things are as emotionally draining and burnout inducing as witnessing the death or suffering of a child.\n:::\n\n::: KY-ALL\n  \n\nVI. Determination of Death - Discontinuance of Resuscitation by a Paramedic\n\nA. An EMS provider may discontinue resuscitative efforts/ CPR if, prior to transport:\n\n1. The patient has suffered cardiac arrest.\n\n2. The patient meets all of the following criteria:\n\ni. Unresponsiveness\n\nii. Apnea\n\niii. The absence of a palpable pulse at the carotid site\n\niv. Bilaterally fixed and dilated pupils,\n\n3. ONE OF THE FOLLOWING:\n\ni. The EMS provider is presented a standard form or identification evidencing a desire not to be resuscitated in accordance with KRS 311.623 (DNR regulation) or 201 KAR 9:470 (MOST regulation)\n\n**OR**\n\nii. The EMS provider discovers that one (1) or more of the following factors or conditions exist:\n\na. Lividity of any degree\n\nb. Rigor mortis of any degree (In the non-hypothermic patient)\n\nc. The presence of venous pooling in the body\n\nd. Damage or destruction of the body which is incompatible with life (such as decapitation, hemicorpectomy, evisceration of heart or lungs, body burned beyond recognition, or injury that does not allow resuscitative efforts to be performed)\n\nB. Paramedic may discontinue resuscitative efforts/ CPR if, prior to transport:\n\n1. The patient has suffered cardiac arrest.\n2. The Paramedic has attempted and documented the resuscitative efforts specified in the Asystole Protocol, including successful airway management, IV/IO access, and IV/ IO administration of epinephrine.\n\n3. The resuscitative efforts were unsuccessful after at least 20 minutes of ALS care; and\n\n4. The patient meets the following criteria:\n\na. Unresponsiveness\n\nb. Apnea\n\nc. The absence of a palpable pulse at the carotid site\n\nd. Bilaterally fixed and dilated pupils\n\ne. Asystole determined in two (2) leads on an electrocardiograph, except in cases of trauma (Note: Slo, wide-complex agonal complexes are considered a variant of asystole).\n\n5. The paramedic shall make reasonable efforts to contact the on duty MEDICAL CONTROL to discuss the case and intention to discontinue resuscitative efforts, and may then pronounce the patient dead.\n\nC. If a paramedic is not available on scene and unable to respond in a timely manner, but another qualified EMS provider (EMT/ AEMT) has performed all the above resuscitative efforts that are within their scope of practice including at least 20 minutes of resuscitative effort, and the requirements of section IV.B.4 above are met (excluding EKG determination), and\n\n1. Arrest was not witnessed by EMS\n\n2. ROSC was not achieved in the field.\n\n3. No AED shocks were delivered\n\n4. The EMT/AEMT shall contact online medical control to request CPR, ventilation, and drug/fluid/electrical therapy be withheld based on medical futility. In this case, the coroner shall be called and make the final pronouncement of death. The EMS provider must remain with the patient until death is pronounced and observe for any changes in condition.\n\nD. If the patient’s medical power of attorney or legally authorized medical decision maker* is present on scene and wishes to revoke consent for further treatment (ie resuscitative efforts), medical control shall be contacted for consultation and orders. The medical control physician may order any treatment being provided to be withheld in accordance with the wishes of the medical decision maker speaking for the patient. If the patient remains in cardiac arrest, the patient may be pronounced dead by a paramedic if the patient meets the criteria laid out in VI.A or VI.B above. If a paramedic is not on scene, the crew must remain on scene and evaluate for any changes in condition until the jurisdiction’s cornor or a healthcare provider authorized to pronounce death arrives on scene and pronounces the patient dead. (*Authority for decision making when the patient is not able to express their own wishes is granted to the following in decending order (KRS 311.631): legal guardian, medical power of attorney, spouse, adult children, parents, closest reasonably available next of kin.)\n\nE. The EMS provider shall document all items required on the run report including the usual patient assessment, medical history and surrounding events information. It is especially important to note:\n\n1. Body position and location where discovered, including differences from when last seen alive\n\n2. Patient condition when last seen alive\n\n3. Clothing and condition of clothing\n\n4. Condition of residence/business/location found\n\n5. Statements made on scene by significant individuals\n\n6. Any unusual circumstances\n\n  \n\nIN THE EVENT OF ANY UNCERTAINTY AS TO THE PATIENT STATUS, THE CREW IS TO INITIATE NORMAL RESUSCITATIVE EFFORTS.\n:::",
+      "id": "p_1783286506827_39urx"
+    },
+    {
+      "title": "A104: Control of EMS at Scene of Emergency",
+      "setId": "set1",
+      "level": "all",
+      "tags": [
+        "Administrative"
+      ],
+      "revised": "2026-07-05",
+      "content": "# A104: Control of EMS at Scene of Emergency\n\n::: ALL\n  \n\n**I. Introduction**\n\nA. One of the most difficult situations for the paramedic is that created by the arrival of a physician at the scene. A different set of responsibilities exists when that physician knows and has established a previous doctor-patient relationship with the patient as opposed to when no such relationship exists. Physicians who are part of the EMS system such as the service's medical director or on-line medical control physician are generally responsible for patient care.\n\n**II. Physician Without Previous Doctor-Patient Relationship**\n\nA. FOR A FULLY LICENSED PHYSICIAN WHO IS NOT A PART OF THE EMS SYSTEM TO ASSUME CONTROL AT THE SCENE OF AN EMERGENCY, ALL OF THE FOLLOWING MUST TAKE PLACE:\n\n1. Proof of the physician's identity and current state licensure must be provided to the senior Medic/EMT.\n\n2. The physician must agree to accompany the patient to the hospital.\n\n3. The on-line medical control physician must be notified and agree to relinquish control to the on-scene physician. This can usually best be accomplished by having the medical control physician speak directly with the physician at the scene.\n\n4. The physician at the scene must agree to sign his or her orders.\n\n5. If the on-scene physician has not given orders or performed invasive interventions, and the ongoing care of the patient is within the scope of practice of the on-scene EMS crew, the EMS crew may release the on-scene physician and not require him/her to transport.\n\n6. Nothing within this protocol prohibits an on-scene physician from assisting an EMS crew with carrying out their normal protocol treatment. Assistance of a physician on scene does not constitute a physician taking control of the scene.\n\n**III. Physician with Previous Doctor-Patient Relationship**\n\nA. As a general rule, it is desirable that the Medic/EMTs called to the scene of an emergency, even within a physician's office, perform an assessment and manage the patient just as would be done in any other location.\n\nB. If the physician wishes to take control of the patient's management, he or she may do so if:\n\n1. Communication is established between on-line medical control and the physician at the scene, and\n\n2. The scene physician agrees to accompany the patient to the hospital.\n\nC. If control of the emergency is assumed by the on-scene physician, then:\n\n1. The physician’s license number will be recorded on the run report.\n\n2. Orders within the scope of training and practice of the Medic/EMT will be carried out.\n\n3. Orders outside the scope of training and practice of the Medic/EMT will be personally carried out by the on-scene physician.\n\n4. The on-scene physician will sign his or her orders.\n\n5. The on-scene physician must accompany the patient in the ambulance to the hospital unless released by the on-line medical control physician.\n\n**IV. If control of the emergency is given to the on-scene physician, then the physician can only issue orders within the scope of training and practice of the Medic/EMT.**\n\n**V. Any orders or procedures outside of the Medic/EMT’s scope of practice will have to be carried out personally by the on-scene physician.**\n\n**Notes:**\n\nA. In a disaster or multi-casualty situation, then the on-scene physician should use his best judgment about whether or not to accompany the patient to the hospital. It may be appropriate to stay at the scene and tend to the patients remaining. Generally, these decisions should be made in consultation with the medical control physician.\n\nB. If the physician on the scene does not accompany the patient to the hospital, then responsibility for that patient will revert to the medical control physician.\n:::\n\n::: KY-ALL\n  \n**VI. On-Scene Medical Personnel**\n\nA. The medical care provided at the scene is the responsibility of the highest level of EMS provider who has responded by usual dispatch system to that scene. Passersby who stop to help, even though possibly more highly trained than the system providers, may not assume responsibility (except as outlined below) but may be allowed to help in care at the discretion of the lead EMS provider and assuming they have proof of licensure.\n\nB. When an EMS provider, under medical control (on- or off-line), arrives at the scene of an emergency, the provider acts as the agent of medical control.\n\nC. Any healthcare provider (physician, physicians assistant, registered nurse, nurse midwife, non-KY licensed EMS provider, etc.) who is not an active member of the responding EMS unit, and who is either at the scene at the time of EMS’ arrival, or arrives after an EMS unit provider has initiated care, and who desires to continue to participate, should be put in touch with the on-line medical control physician.\n\nD. At no time should an EMS provider provide care outside of their scope of training and/or protocols.\n\nE. In the event that a Mass Casualty Incident (MCI) is declared, all providers should follow the Mass Casualty Incidents Uniform Prehospital MCI Procedure outlined in this document or similar approved Incident Command System.\n:::",
+      "id": "p_1783286655242_1yg8p"
+    },
+    {
+      "title": "A102: Pharmacologic Assisted Intubation Administrative Recommendations",
+      "setId": "set1",
+      "level": "all",
+      "tags": [
+        "Administrative"
+      ],
+      "revised": "2026-07-05",
+      "content": "# A102: Pharmacologic Assisted Intubation Administrative Recommendations\n\n::: Medic\n  \n\n**I. Pharmacologic-Assisted Intubation:**\n\nA. Definition: **_Any_** use of medication(s) to facilitate endotracheal intubation.\n\n**II. Administrative Recommendations:**\n\nA. It is _strongly recommended_ that the service Medical Director adhere to the following administrative recommendations for the use of pharmacologic-assisted Intubation:\n\n1. Medical direction with concurrent and retrospective oversight supervision.\n\n2. Advanced training and continuing education designed to demonstrate initial, ongoing, and improving competence in the procedure, including supervised procedural experience.\n\n3. Advanced training in airway management of patients who cannot be intubated, as well as the availability, and competence in the use of rescue airway methods in the event of failed pharmacologic-assisted intubation.\n\n4. Standardized pharmacologic-assisted intubation protocols/procedure set forth by the services Medical Director, including the use of sedation, analgesia, and neuromuscular blockade.\n\n5. Resources for drug storage and delivery.\n\n6. Resources for continuous monitoring and recording of heart rate and rhythm, SpO2, and end-tidal carbon dioxide, before, during, and after pharmacologic-assisted intubation.\n\n7. Appropriate training and equipment to confirm initial and verify ongoing tube placement, continuing quality assurance, quality control, performance review, and when necessary supplemental training.\n:::\n\n::: KY-MEDIC\n  \n\n**III.** Pharmacologic-assisted Intubation:\n\nA. This is a restricted procedure. A service will require specific authorization from the board prior to utilization of this procedure and skill. This procedure is restricted and also requires State Medical Advisor approval.\n\n**IV. Pediatric Pharmacologic-assisted Intubation:**\n\nA. Advanced provider certification required:\n\n1. Critical Care Transport Paramedic (CCP-C)\n\n2. Flight Paramedic Certification (FP-C)\n\n3. Certified Flight Registered Nurse (CFRN)\n4. Other certification approved by the _Kentucky Board of EMS_ and the service Medical Director\n:::",
+      "id": "p_1783286681917_vegmi"
+    },
+    {
+      "title": "T713",
+      "setId": "set1",
+      "level": "all",
+      "tags": [
+        "Procedure"
+      ],
+      "revised": "2026-07-05",
+      "content": "<h1 id=\"mechanical-ventilator-setup-and-management\">Mechanical Ventilator Setup and Management</h1>\n::: all\n\n<h2 id=\"all\">ALL</h2>\n<p><strong>I. STANDARDS</strong></p>\n<p>A. This protocol is intended to apply to the emergency transport of patients requiring immediate medical care and evaluation. It is not intended to apply to the non-emergent transport of chronically ventilated patients.</p>\n<p>B. There are different models of mechanical ventilators on the market. Medics must be trained on the specific model used by their department.</p>\n<p>C. EMS providers should only be responsible for use of the ventilator that their agency provides and trains with. In other words, the EMS provider should not be responsible for a patient’s own ventilator or a ventilator from a facility where a patient is being transported from.</p>\n<p>D. There are situations where the best thing for patient care is for the patient to be maintained on their own ventilator. These situations should be rare and would typically be situations where a patient is on a ventilator at home.</p>\n<p>E. If the reason for transport involves an issue related to the patient’s ventilator, the patient should be removed from their ventilator and manually ventilated.</p>\n<p>F. If the reason for transport is a non-respiratory issue, the patient may benefit from staying on their ventilator. If there is a family member or care provider that has been trained on the patient’s ventilator, then the patient may be transported on their ventilator with that care provider responsible for the patient’s ventilator.</p>\n:::\n::: emt\n\n\n<h2 id=\"emt\">EMT</h2>\n<p>G. Call for ALS backup for any patient on a ventilator.</p>\n<p>H. If the patient’s ventilator has malfunctioned or the patient is in respiratory distress remove them from the ventilator and manually ventilate.</p>\n<p>I. If the patient is stable on the ventilator it is acceptable to start transport with the patient on their ventilator if there is a family member or care provider trained to monitor the ventilator who can be responsible for the ventilator during transport.</p>\n:::\n::: medic\n<h2 id=\"medic\">Medic</h2>\n<p><strong>II. INDICATIONS</strong></p>\n<p>A. Age greater than or equal to 16 years.</p>\n<p>B. Mechanical ventilation may be initiated after a patient has been intubated.</p>\n<p>C. Mechanical ventilation may be continued if it was initiated prior to EMS contact. Refer to M415 for continuation of pre-existing medical devices.</p>\n<p><strong>III. CONTRAINDICATIONS</strong></p>\n<p>A. Cardiac arrest is relative contraindication, if short of manpower and use of mechanical ventilation would facilitate patient care then refer to “Six Dial Setup” in the notes.</p>\n<p><strong>IV. INITIAL VENTILATOR SETUP</strong></p>\n<p>A. If patient has been on ventilator prior to EMS assuming care, it is appropriate to continue ventilator settings that were previously established.</p>\n<p>B. There are many ventilator strategies that exist. Consideration of all these strategies based on clinical scenario is felt to be unnecessary for the brief duration of mechanical ventilator support during EMS care. This initial setup is basic by design.</p>\n<p>C. Mode – Assist Control</p>\n<p>D. Rate – 12 breaths per minute</p>\n<p>E. FiO2 – 100%</p>\n<p>F. PEEP – 5 cm H2O</p>\n<p>G. Tidal Volume – 450ml for female patient and 500ml for male patient</p>\n<ol>\n<li>\n<p>These volumes are meant to reflect volume of 7ml/kg for the “average size” adults</p>\n</li>\n<li>\n<p>There are charts that would allow more specific tidal volumes based on height and ideal body weight for males and females. Asking medics to estimate height and to calculate ideal body weight seems unnecessary since these settings will be temporary and can be adjusted by provider at receiving facility.</p>\n</li>\n</ol>\n<p>H. All patients placed on mechanical ventilator must have continuous end tidal CO2 monitoring performed.</p>\n<p><strong>V. VENTILATOR ADJUSTMENTS AND ETCO2 MONITORING</strong></p>\n<p>A. Ventilator adjustments are usually made based on analysis of arterial blood gas.</p>\n<p>B. Ideal EtCO2 is 35-45mmHG for patients who are not in cardiac arrest. If your intubated patient has EtCO2 outside this range for greater than 10 minutes after being placed on the ventilator you should consider contacting medical control for recommendations to adjust ventilator settings.</p>\n<p>C. Goal EtCO2 is &gt;10mmHG during CPR, an abrupt rise in EtCO2 is often an indication of ROSC</p>\n<p>D. If the medic has questions or concerns about ventilator settings during transport, they should contact medical control for further instruction.</p>\n<p><strong>VI. WHAT TO DO IN VENTILATOR EMERGENCY</strong></p>\n<p>A. First thing to do if the patient has declining oxygen saturations or change in ventilatory status is to take them off the mechanical ventilator and ventilate manually.</p>\n<p>B. Next consider potential causes of the ventilator emergency using the DOPE is acronym.</p>\n<ol>\n<li>\n<p>D – Dislodged or disconnected tube</p>\n</li>\n<li>\n<p>O – Obstruction</p>\n</li>\n<li>\n<p>P – Pneumothorax</p>\n</li>\n<li>\n<p>E – Equipment failure</p>\n</li>\n</ol>\n<p>C. Once the patient stabilizes and problem has been addressed the patient may be placed back on the mechanical ventilator.</p>\n<p><strong>NOTES:</strong></p>\n<p>A. Six Dial Setup</p>\n<ol>\n<li>\n<p>Mode – Volume Control Ventilation</p>\n</li>\n<li>\n<p>PEEP – 0 cm H2O</p>\n</li>\n<li>\n<p>Tidal Volume – 8mL/lg</p>\n</li>\n<li>\n<p>FIO2 – 100%</p>\n</li>\n<li>\n<p>Respiratory Rate – 10 Breaths per Minute</p>\n</li>\n<li>\n<p>Maximum Peak Inspiratory Pressure (Pmax Alarm) – 60cm of H2O</p>\n</li>\n<li>\n<p>Ventilation Trigger – Off</p>\n</li>\n<li>\n<p>Adequate Inspiratory Time – 1 second</p>\n</li>\n</ol>\n<p><strong>REFERENCES:</strong></p>\n<p>A. Sahu AK, Timilsina G, Mathew R, Jamshed N, Aggarwal P. “Six-dial Strategy”-Mechanical Ventilation during Cardiopulmonary Resuscitation. Indian J Crit Care Med. 2020;24(6):487-489. doi:10.5005/jp-journals-10071-23464</p>\n:::",
+      "id": "p_1783286718604_yhic6"
+    },
+    {
+      "title": "M403: Asthma - COPD",
+      "setId": "set1",
+      "level": "all",
+      "tags": [
+        "Medical"
+      ],
+      "revised": "2026-07-05",
+      "content": "## M403: Asthma - COPD\n\n\n::: all\n1.  **Inclusion Criteria**\n2.  Patient’s age is 16 years or older.\n3.  The patient has a history of asthma, emphysema or COPD AND complains of a worsening shortness of breath.\n4.  Lung exam has wheezing, rales/rhonchi, or poor air exchange.\n:::\n\n::: medic\n1.  EKG Findings indicate normal sinus rhythm, sinus tachycardia or atrial fibrillation with controlled ventricular response. If other rhythm is present, then proceed to the appropriate arrhythmia protocol.\n:::\n::: emt\n1.  **Protocol**\n    1.  If available, request ALS back-up for:\n        1.  Pediatric patient, who is wheezing, grunting, has retractions, stridor, or any other signs of respiratory distress.\n        2.  Patient who doesn’t have a prescribed inhaler and the transport time is greater than 30 minutes.\n:::\n::: all\n*   1.  Administer one of the following routes:\n        1.  Administer Albuterol (Proventil) aerosol 2.5mg/2.5ml via nebulizer up to three times. Consider adding 1 vial Ipratropium Bromide (0.5mg of 0.017%) to the Albuterol aerosol. May substitute Duoneb (Albuterol plus Ipratropium Bromide that is premixed) for all Albuterol treatments.\n        2.  Assist patient in administering their metered-dose inhaler up to three times.\n        3.  To assist with administration of a metered-dose inhaler:\n            1.  Make sure inhaler is at room temperature and shake several times to mix the medication.\n            2.  Take oxygen mask off the patient.\n            3.  Tell the patient to exhale deeply and put the mouthpiece in front of the mouth. If the patient has a spacer device, it should be used.\n            4.  Have patient depress the metered-dose inhaler as they begin to inhale deeply.\n            5.  Instruct the patient to hold their breath for as long as comfortable, so the medication can be absorbed.\n            6.  Put oxygen mask back on the patient.\n        4.  Repeat a dose after one minute. If further medication is necessary beyond the above number of doses, contact medical control.\n\n1.  Recheck vital signs (including pulse oximetry if available) and perform focused assessment.\n:::\n\n::: medic\n1.  If the patient is in impending respiratory failure, obtain IV access.\n2.  If multiple Albuterol treatments are anticipated, administer Prednisone 60 mg PO or Solu-Medrol (Methylprednisolone) 60 mg IV or PO.\n3.  If signs of impending respiratory failure (see notes):\n    1.  Consider initiating non-invasive positive pressure ventilation (BIPAP or CPAP). Start at 5 cmH2O and titrate higher as tolerated by patient.\n    2.  **ASTHMA ONLY**: Consider administering epinephrine 0.5 mg IM (1mg/ml) followed by magnesium sulfate 2 g IV/IO diluted in 100 ml normal saline over 20 minutes.\n4.  Consider repetitive Albuterol treatments if needed, up to a total of three treatments.\n:::\n\n::: all\n\n1.  Consider PAP, reference [protocol T709](#T709CPAP).\n\n**Notes:**\n\n1.  When attempting to differentiate between COPD and congestive heart failure, the medication history will usually give more valuable information than will the physical exam.\n2.  Ipratropium Bromide is an anticholinergic medication and may cause tachycardia. Do not use on patients with narrow angle glaucoma or patients with bladder neck obstruction (history of urinary retention).\n3.  There is growing evidence that steroids (Prednisone or Solu-Medrol (Methylprednisolone) for adults may be beneficial.\n4.  Solu-Medrol (Methyprednisolone) can be given orally to adult patients, though the IV route is preferred.\n5.  Signs of impending respiratory failure\n    1.  Depressed mental status or excessive sleepiness\n    2.  Agitation, panic, or sensation of drowning\n    3.  Inability to maintain respiratory effort.\n    4.  Cyanosis or worsening hypoxia\n:::",
+      "id": "p_1783286874216_3r026"
+    }
+  ]
+}
