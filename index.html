@@ -459,7 +459,9 @@
   <div id="topbar">
     <div id="topbar-row1">
       <button id="menu-btn" onclick="toggleSidebar()">☰</button>
-      <div class="logo">
+      <div class="logo" onclick="showPage('home')" title="Return to home" role="button" tabindex="0"
+           onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showPage('home');}"
+           style="cursor:pointer;">
         <span class="cross">✚</span>
         <span><span class="logo-text-short" style="display:none">Med</span><span class="logo-text-full">Med</span><span style="color:var(--accent)">Command</span></span>
       </div>
@@ -471,7 +473,7 @@
         </span>
         <button class="icon-btn" onclick="toggleTheme()" title="Toggle Day/Night">🌙</button>
         <button class="icon-btn" onclick="showPage('bookmarks')" title="Bookmarks">⭐</button>
-        <button class="icon-btn" onclick="openAdminLogin()" title="Admin Settings">⚙️</button>
+        <a class="icon-btn" href="/admin" target="_blank" rel="noopener" title="Admin / Protocol Editor" style="text-decoration:none;">⚙️</a>
       </div>
     </div>
     <div id="topbar-row2">

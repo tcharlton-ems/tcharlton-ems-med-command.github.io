@@ -38,7 +38,13 @@ const { gfm }  = require('turndown-plugin-gfm');
 
 const app      = express();
 const PORT     = process.env.PORT || 3000;
-const DATA_FILE = path.join(__dirname, 'data.json');
+// Runtime data (protocols + backups) lives in DATA_DIR. It defaults to the app
+// folder for local use, but on a host with an ephemeral filesystem (Railway,
+// Render, Fly, etc.) point DATA_DIR at a mounted persistent volume so protocols
+// and password changes survive redeploys. The app code (HTML) always loads from
+// __dirname regardless.
+const DATA_DIR  = process.env.DATA_DIR || __dirname;
+const DATA_FILE = path.join(DATA_DIR, 'data.json');
 const HTML_FILE = path.join(__dirname, 'index.html');
 
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 25 * 1024 * 1024, files: 50 } });
@@ -76,7 +82,7 @@ app.use(express.json({ limit: '10mb' }));
 // ─────────────────────────────────────────────────
 // DATA HELPERS
 // ─────────────────────────────────────────────────
-const BACKUP_DIR   = path.join(__dirname, 'backups');
+const BACKUP_DIR   = path.join(DATA_DIR, 'backups');
 const MAX_BACKUPS  = 30;
 
 // Copy the current data.json into backups/ with a label + timestamp.
@@ -372,6 +378,11 @@ app.post('/api/auth', authLimiter, (req, res) => {
   res.json({ token: genToken() });
 });
 
+// Lightweight token check for the admin UI to confirm a stored token is still
+// valid on page load. Must be auth-protected — a public route (e.g. GET
+// /api/protocols) can never return 401 and so can't detect a stale token.
+app.get('/api/auth/verify', requireAuth, (req, res) => res.json({ ok: true }));
+
 // ─────────────────────────────────────────────────
 // FULL STATE  (read = public, write = admin)
 // ─────────────────────────────────────────────────
@@ -642,9 +653,16 @@ app.use((err, req, res, next) => {
 // START
 // ─────────────────────────────────────────────────
 
+// Make sure DATA_DIR exists (e.g. a freshly-mounted persistent volume).
+try { if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true }); } catch (e) {}
+
 // Initialise data.json if it doesn't exist
 if (!fs.existsSync(DATA_FILE)) {
-  saveData(getDefaultData());
+  const seed = getDefaultData();
+  // On a fresh deploy, seed the admin password from ADMIN_PASSWORD if provided,
+  // so the instance never goes live on the well-known default.
+  if (process.env.ADMIN_PASSWORD) seed.adminPasswordHash = hashPassword(process.env.ADMIN_PASSWORD);
+  saveData(seed);
   console.log('Created fresh data.json with default data.');
 } else {
   // Snapshot existing data on every startup so a code update or bad deploy
@@ -658,6 +676,10 @@ app.listen(PORT, () => {
   console.log(`  Running at:  http://localhost:${PORT}`);
   console.log(`  Data file:   ${DATA_FILE}`);
   console.log(`  HTML file:   ${HTML_FILE}`);
-  console.log(`\n  Default admin password: admin123`);
-  console.log(`  Change it immediately in the Admin Panel.\n`);
+  if (process.env.ADMIN_PASSWORD) {
+    console.log(`\n  Admin password: set via ADMIN_PASSWORD env var.\n`);
+  } else {
+    console.log(`\n  Default admin password: admin123`);
+    console.log(`  Change it immediately in the Admin Panel.\n`);
+  }
 });

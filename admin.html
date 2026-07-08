@@ -330,7 +330,7 @@ textarea.import-ta:focus { border-color: var(--accent); }
 
 <!-- TOPBAR -->
 <div id="topbar">
-  <div class="logo"><span class="cross">✚</span><span>Med</span>Command</div>
+  <a class="logo" href="/" title="Return to home" style="cursor:pointer;text-decoration:none;color:inherit;"><span class="cross">✚</span><span>Med</span>Command</a>
   <div class="topbar-sep"></div>
   <h2>Protocol Editor</h2>
   <div class="spacer"></div>
@@ -1171,6 +1171,11 @@ async function restoreBackup(input) {
       headers: token ? { 'Authorization': 'Bearer ' + token } : {},
       body: formData
     });
+    if (res.status === 401) {
+      logout();
+      toast('Your session expired — please log in again, then retry the restore.', 'error');
+      return;
+    }
     const payload = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(payload.error || res.statusText);
 
@@ -1214,6 +1219,12 @@ async function convertImportFiles() {
       headers: token ? { 'Authorization': 'Bearer ' + token } : {},
       body: formData
     });
+    if (res.status === 401) {
+      statusEl.textContent = '';
+      logout();
+      toast('Your session expired — please log in again, then retry.', 'error');
+      return;
+    }
     const payload = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(payload.error || res.statusText);
     const { protocols, errors } = payload;
@@ -1302,11 +1313,14 @@ window.addEventListener('beforeunload', e => {
 (async () => {
   if (token) {
     try {
-      // Test the stored token is still valid by hitting a protected endpoint
-      const r = await fetch('/api/protocols', {
+      // Validate the stored token against an AUTH-PROTECTED endpoint. Hitting a
+      // public route here (e.g. /api/protocols) would return 200 for a stale
+      // token and wrongly skip the login screen — exactly what happens after a
+      // server restart clears the in-memory token store.
+      const r = await fetch('/api/auth/verify', {
         headers: { 'Authorization': 'Bearer ' + token }
       });
-      if (r.status === 401) throw new Error('Token expired');
+      if (!r.ok) throw new Error('Token expired');
       await loadAll();
       document.getElementById('login-modal').style.display = 'none';
     } catch {
